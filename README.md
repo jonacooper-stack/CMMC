@@ -9,15 +9,17 @@ The current focus is **validation**: prove the product, the market demand, and t
 - [`docs/positioning-and-messaging.md`](docs/positioning-and-messaging.md) — positioning, persona, battlecard, pricing, objections.
 - [`brand/naming-sprint.md`](brand/naming-sprint.md) — naming sprint record (decision: **Muster**).
 - [`brand/brand-guide.md`](brand/brand-guide.md) + [`brand/muster-wordmark.svg`](brand/muster-wordmark.svg) — identity kit.
-- [`web/`](web/) — the marketing site + assessment funnel (Next.js 16 + Tailwind v4).
+- [`src/`](src/) — the marketing site + assessment funnel (Next.js 16 + Tailwind v4). **The app lives at the repo root** so Vercel deploys it with zero config (Root Directory = default/empty).
 
 ## Run the web app
 ```bash
-cd web
 npm install      # first time
 npm run dev      # http://localhost:3000
 npm run build    # production build (verified passing)
 ```
+
+## Deploying (Vercel)
+The Next.js app is at the **repo root**, so Vercel needs **no Root Directory override** (leave it blank/`./`). It auto-detects Next.js and builds `npm run build`. Production branch = `main`.
 
 ## Status
 - [x] **WS‑0 brand & identity** — naming sprint complete; brand = **Muster**; brand guide + SVG wordmark.
