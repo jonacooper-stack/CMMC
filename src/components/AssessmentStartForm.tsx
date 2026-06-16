@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Check } from "./ui";
 
 const EMPLOYEES = ["1–15", "16–50", "51–120", "121–200", "200+"];
@@ -40,10 +41,16 @@ export default function AssessmentStartForm() {
         </div>
         <h3 className="mt-4 text-xl font-bold text-navy-900">You&rsquo;re in.</h3>
         <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
-          Check your inbox &mdash; we&rsquo;re setting up your guided SPRS
-          assessment and a founder will make sure your report is on its way
-          within one business day.
+          Let&rsquo;s get your estimated SPRS score now &mdash; the guided
+          questionnaire takes about 15 minutes and you&rsquo;ll see your score the
+          moment you finish. We never ask for your CUI.
         </p>
+        <Link
+          href="/assessment/questionnaire"
+          className="mt-5 inline-flex items-center justify-center rounded-lg bg-cleared-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-cleared-700"
+        >
+          Start the questionnaire
+        </Link>
       </div>
     );
   }
