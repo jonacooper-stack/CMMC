@@ -1,5 +1,8 @@
 # Naming Sprint — Phase 1 Brand
 
+> ## ✅ DECISION: **Muster** *(locked 2026-06-16)*
+> Chosen after three screened waves. Meaning: **"pass muster"** (meet the standard) + **"muster your evidence"** (roll-call / inspection). Domain plan: **getmuster.com / muster.io / mustercompliance.com** (`muster.com` is an unrelated advocacy SaaS; a defense app "Mustr" exists — different markets). Run a formal **USPTO TESS** check (classes 035/042) before heavy brand spend. Identity in [`brand-guide.md`](brand-guide.md) + [`muster-wordmark.svg`](muster-wordmark.svg). *The waves below are kept as the decision record.*
+
 **WS-0 deliverable.** Goal: pick the company/product brand for the Phase-1 managed‑compliance business (the analysis flagged that the working name *SecureControls* sits in a crowded "Secure‑/Cyber‑/Compli‑" space and needs clearance). Pick one name and I'll secure domain guidance, build the identity kit, and thread it through the website, the assessment, and the ads.
 
 > **Phase 2 note:** the future enclave business already has a working name, *BeaconEnclave* — so avoid "Beacon" for Phase 1 to keep the two distinct.
