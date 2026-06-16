@@ -11,7 +11,7 @@ The current focus is **validation**: prove the product, the market demand, and t
 ## Status
 - [x] WS‑0 naming sprint — candidates screened, **awaiting name selection**.
 - [ ] WS‑1 accounts & tooling
-- [ ] WS‑2 messaging & battlecard
+- [x] WS‑2 messaging & battlecard — [`docs/positioning-and-messaging.md`](docs/positioning-and-messaging.md)
 - [ ] WS‑3 marketing website
 - [ ] WS‑4 the initial audit (assessment web app)
 - [ ] WS‑5 worked test case
