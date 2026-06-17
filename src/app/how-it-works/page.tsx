@@ -4,7 +4,7 @@ import { Container, Eyebrow, CTA, Check } from "@/components/ui";
 export const metadata: Metadata = {
   title: "How it works",
   description:
-    "Three stages: a free SPRS readiness assessment, a founder-led mock review and fixed-price proposal, then onboarding and quarterly managed compliance.",
+    "Three stages: a free SPRS readiness assessment, a founder-led consultation and fixed-price proposal, then onboarding and quarterly managed compliance.",
 };
 
 const STAGES = [
@@ -21,7 +21,7 @@ const STAGES = [
   },
   {
     n: "2",
-    title: "Mock review & fixed-price proposal",
+    title: "Consultation & fixed-price proposal",
     lede: "If the report shows a gap worth closing, a founder walks it with you.",
     points: [
       "A deeper look at your real CUI scope and primes",

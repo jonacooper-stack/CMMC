@@ -14,7 +14,7 @@ const STEPS = [
   },
   {
     n: "2",
-    title: "Mock review & fixed-price proposal",
+    title: "Consultation & fixed-price proposal",
     body: "A founder walks your real CUI scope and the path to a defensible score, then sends a written proposal at published pricing. No hourly surprises.",
   },
   {

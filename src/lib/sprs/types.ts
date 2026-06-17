@@ -80,3 +80,46 @@ export type ScoreResult = {
 
 export const MAX_SCORE = 110;
 export const MIN_SCORE = -203;
+
+/**
+ * Richer 4-state status used by the AI policy analysis (and the future
+ * evidence-aware questionnaire). Distinguishes whether a "yes" has an auditable
+ * evidence trail — exactly the gap Muster closes.
+ */
+export type FindingStatus = "met_evidence" | "met_no_evidence" | "partial" | "not_met";
+
+/** A per-control finding from AI policy analysis, the clarifying interview, or manual entry. */
+export type Finding = {
+  controlId: string;
+  status: FindingStatus;
+  source?: "ai_policy" | "interview" | "manual";
+  /** Short plain-English justification for the status. */
+  rationale?: string;
+  /** Verbatim excerpt from the uploaded policy that supports the status. */
+  citationExcerpt?: string;
+  /** Model confidence 0..1 (analysis steps only). */
+  confidence?: number;
+};
+
+/** A control the respondent does but cannot yet prove — at risk in a real assessment. */
+export type AtRiskItem = {
+  id: string;
+  family: string;
+  title: string;
+  /** Points that would be lost in an assessment for lack of an evidence trail. */
+  points: number;
+};
+
+/**
+ * Two scores from one set of findings:
+ * - `selfAssessed`: both "met_*" count as met (what they believe they have).
+ * - `defensible`: only "met_evidence" counts; "met_no_evidence" is treated as
+ *   not-met (what would actually survive an assessment).
+ */
+export type DualScoreResult = {
+  selfAssessed: ScoreResult;
+  defensible: ScoreResult;
+  /** Points at risk purely for lack of evidence (sum of at-risk weights). */
+  evidenceGap: number;
+  atRisk: AtRiskItem[];
+};

@@ -5,9 +5,12 @@
  */
 import {
   type Answers,
+  type AtRiskItem,
   type Control,
   type ControlStatus,
+  type DualScoreResult,
   type FamilyPosture,
+  type FindingStatus,
   type RemediationItem,
   type ScoreResult,
   MAX_SCORE,
@@ -20,6 +23,68 @@ export function deductionFor(control: Control, status: ControlStatus): number {
   if (status === "met") return 0;
   if (status === "partial") return control.partialWeight ?? control.weight;
   return control.weight;
+}
+
+/**
+ * Collapse a 4-state finding into the deterministic ControlStatus under a lens:
+ * - "self": both "met_*" count as met (self-assessed).
+ * - "defensible": only "met_evidence" counts; "met_no_evidence" → not_met.
+ */
+export function findingToControlStatus(
+  status: FindingStatus,
+  lens: "self" | "defensible",
+): ControlStatus {
+  switch (status) {
+    case "met_evidence":
+      return "met";
+    case "met_no_evidence":
+      return lens === "self" ? "met" : "not_met";
+    case "partial":
+      return "partial";
+    case "not_met":
+      return "not_met";
+  }
+}
+
+/**
+ * Dual SPRS score from a set of findings. Reuses the exact same deterministic
+ * `computeScore` (the moat) twice — once per lens — so neither score is ever
+ * produced by an LLM. Unanswered controls are treated as not_met in both lenses.
+ */
+export function computeDualScore(
+  controls: Control[],
+  findings: Record<string, FindingStatus | undefined>,
+): DualScoreResult {
+  const selfAnswers: Answers = {};
+  const defensibleAnswers: Answers = {};
+  for (const control of controls) {
+    const finding = findings[control.id];
+    if (!finding) continue;
+    selfAnswers[control.id] = findingToControlStatus(finding, "self");
+    defensibleAnswers[control.id] = findingToControlStatus(finding, "defensible");
+  }
+
+  const atRisk: AtRiskItem[] = [];
+  for (const control of controls) {
+    if (findings[control.id] === "met_no_evidence") {
+      atRisk.push({
+        id: control.id,
+        family: control.family,
+        title: control.title,
+        points: control.weight,
+      });
+    }
+  }
+  atRisk.sort(
+    (a, b) => b.points - a.points || a.id.localeCompare(b.id, undefined, { numeric: true }),
+  );
+
+  return {
+    selfAssessed: computeScore(controls, selfAnswers),
+    defensible: computeScore(controls, defensibleAnswers),
+    evidenceGap: atRisk.reduce((sum, item) => sum + item.points, 0),
+    atRisk,
+  };
 }
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));

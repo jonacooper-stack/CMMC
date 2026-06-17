@@ -133,7 +133,7 @@ export default function Results({
         </h2>
         <p className="mt-2 max-w-xl text-sm text-slate-600">
           We&rsquo;ll turn this into a 15&ndash;25 page report mapped to all 110 controls &mdash;
-          your current and target score, a prioritized remediation plan, and a free mock review
+          your current and target score, a prioritized remediation plan, and a free consultation
           with a founder. We never ask for your CUI.
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
@@ -147,7 +147,7 @@ export default function Results({
             href="/contact"
             className="inline-flex items-center justify-center rounded-lg border border-line bg-white px-5 py-3 text-sm font-semibold text-navy-900 transition-colors hover:border-steel-500"
           >
-            Book a mock review
+            Book a consultation
           </Link>
         </div>
       </div>
