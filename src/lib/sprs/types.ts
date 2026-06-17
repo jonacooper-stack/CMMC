@@ -6,7 +6,12 @@
  * is not met. The lowest possible score is -203.
  */
 
-export type ControlWeight = 1 | 3 | 5;
+/**
+ * DoD SPRS point weight — points deducted from 110 if the requirement is NOT
+ * met. 5/3/1 per the methodology; 0 marks the single NA requirement (3.12.4,
+ * the SSP), a gating prerequisite rather than a scored deduction.
+ */
+export type ControlWeight = 0 | 1 | 3 | 5;
 
 /** A single NIST 800-171 Rev 2 control objective + its DoD SPRS weight. */
 export type Control = {
@@ -16,7 +21,7 @@ export type Control = {
   family: string;
   /** Official short requirement title. */
   title: string;
-  /** Points deducted from 110 if the requirement is NOT met. */
+  /** Points deducted from 110 if the requirement is NOT met (0 = NA/gating). */
   weight: ControlWeight;
   /**
    * Reduced deduction when the requirement is only PARTIALLY met. Per the DoD
@@ -25,6 +30,8 @@ export type Control = {
    * When undefined, a "partial" answer deducts the full `weight`.
    */
   partialWeight?: ControlWeight;
+  /** Optional advisory note (e.g. the SSP gating-prerequisite explanation). */
+  note?: string;
 };
 
 /** How a respondent rates a single control. */

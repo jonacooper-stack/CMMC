@@ -120,7 +120,14 @@ export default function Results({
         })}
       </ul>
 
-      <div className="mt-12 rounded-2xl border border-cleared-500 bg-cleared-50 p-7 sm:p-8">
+      <p className="mt-8 rounded-lg border border-line bg-paper p-4 text-xs leading-relaxed text-slate-500">
+        <strong className="text-navy-900">One thing the score doesn&rsquo;t show:</strong> a
+        documented System Security Plan (3.12.4) is a gating prerequisite &mdash; a DoD assessment
+        can&rsquo;t even be scored without one. It&rsquo;s worth 0 points on its own, but it&rsquo;s
+        the first thing we build with you.
+      </p>
+
+      <div className="mt-8 rounded-2xl border border-cleared-500 bg-cleared-50 p-7 sm:p-8">
         <h2 className="text-2xl font-bold text-navy-900">
           Want this as a report you can act on?
         </h2>

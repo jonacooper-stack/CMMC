@@ -69,13 +69,16 @@ export function computeScore(controls: Control[], answers: Answers): ScoreResult
     }
     if (fam) fam.pointsLost += points;
 
-    remediation.push({
-      id: control.id,
-      family: control.family,
-      title: control.title,
-      status,
-      points,
-    });
+    // Skip 0-point (NA) controls like 3.12.4 from the point-ranked plan.
+    if (points > 0) {
+      remediation.push({
+        id: control.id,
+        family: control.family,
+        title: control.title,
+        status,
+        points,
+      });
+    }
   }
 
   // Biggest point recovery first, then by control id (numeric-aware).
