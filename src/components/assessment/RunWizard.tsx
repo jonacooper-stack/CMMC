@@ -24,8 +24,10 @@ export default function RunWizard() {
     setStep("processing");
     setPhase("uploading");
     setError("");
+
+    // --- Upload phase: files go straight from the browser to Blob storage. ---
+    const uploaded: { url: string; filename: string; contentType?: string }[] = [];
     try {
-      const uploaded: { url: string; filename: string; contentType?: string }[] = [];
       for (const file of files) {
         const blob = await upload(file.name, file, {
           access: "public",
@@ -34,24 +36,26 @@ export default function RunWizard() {
         });
         uploaded.push({ url: blob.url, filename: file.name, contentType: file.type || undefined });
       }
+    } catch (e) {
+      setError(
+        `Couldn't upload your files: ${e instanceof Error ? e.message : "unknown error"}. ` +
+          "This usually means Blob storage isn't connected to the project yet.",
+      );
+      setStep("error");
+      return;
+    }
 
-      // Analyze. Guard with a hard client-side timeout so the spinner can never
-      // hang indefinitely if the network/gateway stalls.
-      setPhase("analyzing");
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 240_000);
-      let res: Response;
-      try {
-        res = await fetch("/api/assessment/run", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ documents: uploaded }),
-          signal: controller.signal,
-        });
-      } finally {
-        clearTimeout(timeout);
-      }
-
+    // --- Analyze phase. Hard timeout so the spinner can never hang forever. ---
+    setPhase("analyzing");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 240_000);
+    try {
+      const res = await fetch("/api/assessment/run", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documents: uploaded }),
+        signal: controller.signal,
+      });
       // A gateway timeout (504) returns HTML, not JSON — parse defensively.
       const data = await res.json().catch(() => null);
       if (!res.ok) {
@@ -70,12 +74,12 @@ export default function RunWizard() {
       const aborted = e instanceof DOMException && e.name === "AbortError";
       setError(
         aborted
-          ? "This is taking longer than expected. Your documents may be very large — try fewer or smaller files, or split the upload."
-          : e instanceof Error
-            ? e.message
-            : "Something went wrong.",
+          ? "The analysis took too long and timed out. Try fewer or smaller documents."
+          : `Analysis request failed: ${e instanceof Error ? e.message : "unknown error"}`,
       );
       setStep("error");
+    } finally {
+      clearTimeout(timeout);
     }
   }
 

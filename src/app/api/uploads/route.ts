@@ -19,6 +19,16 @@ const ALLOWED_CONTENT_TYPES = [
 const MAX_BYTES = 50 * 1024 * 1024; // 50 MB per file
 
 export async function POST(request: Request): Promise<NextResponse> {
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return NextResponse.json(
+      {
+        error:
+          "Blob storage is not configured. Create a Blob store in Vercel → Storage and redeploy (it sets BLOB_READ_WRITE_TOKEN).",
+      },
+      { status: 503 },
+    );
+  }
+
   let body: HandleUploadBody;
   try {
     body = (await request.json()) as HandleUploadBody;
