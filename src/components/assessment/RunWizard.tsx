@@ -27,13 +27,16 @@ export default function RunWizard() {
   // so opening the picker again adds to the list instead of replacing it.
   function addFiles(selected: FileList | null) {
     if (!selected?.length) return;
-    setFiles((prev) => {
-      const seen = new Set(prev.map((f) => `${f.name}:${f.size}`));
-      const additions = Array.from(selected).filter((f) => !seen.has(`${f.name}:${f.size}`));
-      return [...prev, ...additions];
-    });
+    // Snapshot the picked files NOW: resetting the input below empties this
+    // FileList, and setFiles' updater runs later (after this handler returns).
+    const picked = Array.from(selected);
     // Clear the native input so re-picking the same file still fires onChange.
     if (fileInputRef.current) fileInputRef.current.value = "";
+    setFiles((prev) => {
+      const seen = new Set(prev.map((f) => `${f.name}:${f.size}`));
+      const additions = picked.filter((f) => !seen.has(`${f.name}:${f.size}`));
+      return additions.length ? [...prev, ...additions] : prev;
+    });
   }
 
   function removeFile(name: string, size: number) {
