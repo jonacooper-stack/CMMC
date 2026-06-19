@@ -18,7 +18,7 @@ import {
   index,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
-import type { DualScoreResult } from "../sprs/types";
+import type { DualScoreResult, FindingStatus } from "../sprs/types";
 
 export const planEnum = pgEnum("plan", ["free", "paid"]);
 export const assessmentStatusEnum = pgEnum("assessment_status", [
@@ -93,7 +93,10 @@ export const controlFindings = pgTable(
       .references(() => assessments.id, { onDelete: "cascade" }),
     /** NIST 800-171 control id, e.g. "3.1.1". */
     controlId: text("control_id").notNull(),
-    status: findingStatusEnum("status").notNull(),
+    // Stored as text (not the pgEnum) so new statuses like "na" don't require a
+    // fragile ALTER TYPE ... ADD VALUE on the serverless driver. The TS union is
+    // still enforced in app code via $type.
+    status: text("status").$type<FindingStatus>().notNull(),
     source: findingSourceEnum("source").notNull().default("ai_policy"),
     rationale: text("rationale"),
     citationExcerpt: text("citation_excerpt"),

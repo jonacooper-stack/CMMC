@@ -18,7 +18,6 @@ const STATEMENTS: string[] = [
   `DO $$ BEGIN CREATE TYPE "assessment_status" AS ENUM('draft','uploading','analyzing','interview','complete','failed'); EXCEPTION WHEN duplicate_object THEN null; END $$;`,
   `DO $$ BEGIN CREATE TYPE "finding_source" AS ENUM('ai_policy','interview','manual'); EXCEPTION WHEN duplicate_object THEN null; END $$;`,
   `DO $$ BEGIN CREATE TYPE "finding_status" AS ENUM('met_evidence','met_no_evidence','partial','not_met'); EXCEPTION WHEN duplicate_object THEN null; END $$;`,
-  `ALTER TYPE "finding_status" ADD VALUE IF NOT EXISTS 'na';`,
   `DO $$ BEGIN CREATE TYPE "plan" AS ENUM('free','paid'); EXCEPTION WHEN duplicate_object THEN null; END $$;`,
   `CREATE TABLE IF NOT EXISTS "accounts" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
@@ -40,7 +39,7 @@ const STATEMENTS: string[] = [
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
     "assessment_id" uuid NOT NULL,
     "control_id" text NOT NULL,
-    "status" "finding_status" NOT NULL,
+    "status" text NOT NULL,
     "source" "finding_source" DEFAULT 'ai_policy' NOT NULL,
     "rationale" text,
     "citation_excerpt" text,
@@ -48,6 +47,9 @@ const STATEMENTS: string[] = [
     "needs_clarification" boolean DEFAULT false NOT NULL,
     "updated_at" timestamp with time zone DEFAULT now() NOT NULL
   );`,
+  // Migrate existing installs off the finding_status enum so statuses like "na"
+  // insert without an ALTER TYPE ... ADD VALUE (which the serverless driver rejects).
+  `ALTER TABLE "control_findings" ALTER COLUMN "status" TYPE text;`,
   `CREATE TABLE IF NOT EXISTS "documents" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
     "assessment_id" uuid NOT NULL,
