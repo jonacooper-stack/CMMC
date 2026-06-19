@@ -99,6 +99,8 @@ export type Finding = {
   citationExcerpt?: string;
   /** Model confidence 0..1 (analysis steps only). */
   confidence?: number;
+  /** True when the policy was silent/ambiguous — drives the clarifying interview. */
+  needsClarification?: boolean;
 };
 
 /** A control the respondent does but cannot yet prove — at risk in a real assessment. */
