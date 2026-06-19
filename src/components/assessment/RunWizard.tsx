@@ -15,6 +15,9 @@ export default function RunWizard() {
   const [step, setStep] = useState<Step>("upload");
   const [phase, setPhase] = useState<"uploading" | "analyzing">("uploading");
   const [files, setFiles] = useState<File[]>([]);
+  const [links, setLinks] = useState<string[]>([]);
+  const [linkInput, setLinkInput] = useState("");
+  const [linkError, setLinkError] = useState("");
   const [attested, setAttested] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<DualScoreResult | null>(null);
@@ -43,10 +46,31 @@ export default function RunWizard() {
     setFiles((prev) => prev.filter((f) => !(f.name === name && f.size === size)));
   }
 
+  function addLink() {
+    const raw = linkInput.trim();
+    if (!raw) return;
+    let normalized = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+    try {
+      const u = new URL(normalized);
+      if (u.protocol !== "http:" && u.protocol !== "https:") throw new Error("bad protocol");
+      normalized = u.toString();
+    } catch {
+      setLinkError("That doesn't look like a valid web address.");
+      return;
+    }
+    setLinks((prev) => (prev.includes(normalized) ? prev : [...prev, normalized]));
+    setLinkInput("");
+    setLinkError("");
+  }
+
+  function removeLink(url: string) {
+    setLinks((prev) => prev.filter((l) => l !== url));
+  }
+
   async function run() {
-    if (!files.length || !attested) return;
+    if ((!files.length && !links.length) || !attested) return;
     setStep("processing");
-    setPhase("uploading");
+    setPhase(files.length ? "uploading" : "analyzing");
     setError("");
 
     // --- Upload phase: files go straight from the browser to Blob storage.
@@ -85,7 +109,7 @@ export default function RunWizard() {
       const res = await fetch("/api/assessment/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ documents: uploaded }),
+        body: JSON.stringify({ documents: uploaded, links }),
         signal: controller.signal,
       });
       // A gateway timeout (504) returns HTML, not JSON — parse defensively.
@@ -120,6 +144,9 @@ export default function RunWizard() {
   function reset() {
     setStep("upload");
     setFiles([]);
+    setLinks([]);
+    setLinkInput("");
+    setLinkError("");
     setAttested(false);
     setError("");
     setResult(null);
@@ -262,6 +289,61 @@ export default function RunWizard() {
           </ul>
         )}
 
+        <div className="mt-5 border-t border-line pt-5">
+          <p className="text-sm font-medium text-navy-900">Or link to a public document</p>
+          <p className="mt-1 text-xs text-slate-500">
+            Paste a URL to a policy hosted online (e.g. your public privacy policy) and we&rsquo;ll
+            fetch and read the page &mdash; no download needed.
+          </p>
+          <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+            <input
+              type="url"
+              inputMode="url"
+              value={linkInput}
+              onChange={(e) => {
+                setLinkInput(e.target.value);
+                if (linkError) setLinkError("");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addLink();
+                }
+              }}
+              placeholder="https://example.com/privacy-policy"
+              className="min-w-0 flex-1 rounded-lg border border-line bg-paper px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-steel-500 focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={addLink}
+              disabled={!linkInput.trim()}
+              className="flex-none rounded-lg border border-navy-900 bg-white px-4 py-2 text-sm font-semibold text-navy-900 transition-colors hover:bg-navy-900 hover:text-white disabled:opacity-40"
+            >
+              Add link
+            </button>
+          </div>
+          {linkError && <p className="mt-1.5 text-xs text-amber-600">{linkError}</p>}
+          {links.length > 0 && (
+            <ul className="mt-3 space-y-1 text-sm text-slate-600">
+              {links.map((l) => (
+                <li key={l} className="flex items-center justify-between gap-3">
+                  <span className="truncate" title={l}>
+                    {l}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeLink(l)}
+                    aria-label={`Remove ${l}`}
+                    className="flex-none font-medium text-slate-400 transition-colors hover:text-amber-600"
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         <label className="mt-5 flex items-start gap-2.5 text-sm text-slate-600">
           <input
             type="checkbox"
@@ -270,7 +352,7 @@ export default function RunWizard() {
             className="mt-0.5 h-4 w-4 flex-none accent-cleared-600"
           />
           <span>
-            I confirm these files are our security policies/procedures and do not contain CUI or
+            I confirm these documents are our security policies/procedures and do not contain CUI or
             controlled technical data.
           </span>
         </label>
@@ -278,7 +360,7 @@ export default function RunWizard() {
         <button
           type="button"
           onClick={run}
-          disabled={!files.length || !attested}
+          disabled={(!files.length && !links.length) || !attested}
           className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-cleared-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-cleared-700 disabled:opacity-50"
         >
           Analyze my policies

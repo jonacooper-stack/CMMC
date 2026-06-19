@@ -15,7 +15,7 @@ import {
   setStatus,
   type NewDocument,
 } from "@/lib/db/queries";
-import { extractTextFromUrl } from "@/lib/parse/extract";
+import { extractTextFromUrl, extractTextFromWebUrl } from "@/lib/parse/extract";
 import { analyzePolicies, findingsToStatusMap, type PolicyDocument } from "@/lib/ai/analyze";
 import { hasAnthropicKey } from "@/lib/ai/client";
 import { computeDualScore } from "@/lib/sprs/scoring";
@@ -25,18 +25,36 @@ export const runtime = "nodejs";
 // Headroom for the 14-pass policy analysis (capped to the platform plan limit).
 export const maxDuration = 300;
 
-const bodySchema = z.object({
-  documents: z
-    .array(
-      z.object({
-        url: z.string().url(),
-        filename: z.string().min(1),
-        contentType: z.string().optional(),
-      }),
-    )
-    .min(1)
-    .max(25),
-});
+const bodySchema = z
+  .object({
+    documents: z
+      .array(
+        z.object({
+          url: z.string().url(),
+          filename: z.string().min(1),
+          contentType: z.string().optional(),
+        }),
+      )
+      .max(25)
+      .optional(),
+    links: z.array(z.string().url()).max(25).optional(),
+  })
+  .refine((b) => (b.documents?.length ?? 0) + (b.links?.length ?? 0) >= 1, {
+    message: "Add at least one document or link.",
+  })
+  .refine((b) => (b.documents?.length ?? 0) + (b.links?.length ?? 0) <= 25, {
+    message: "That's too many documents at once (max 25).",
+  });
+
+/** A short, human-readable label for a linked document, e.g. "example.com/privacy". */
+function labelFromUrl(u: string): string {
+  try {
+    const url = new URL(u);
+    return `${url.hostname}${url.pathname}`.replace(/\/$/, "").slice(0, 120);
+  } catch {
+    return u.slice(0, 120);
+  }
+}
 
 export async function POST(request: Request): Promise<NextResponse> {
   let accountId: string;
@@ -67,10 +85,11 @@ export async function POST(request: Request): Promise<NextResponse> {
   const assessment = await createAssessment(accountId);
 
   try {
-    // 1. Pull text out of every uploaded document.
+    // 1. Pull text out of every uploaded document and linked URL.
     const docRows: NewDocument[] = [];
     const policyDocs: PolicyDocument[] = [];
-    for (const d of parsed.data.documents) {
+
+    for (const d of parsed.data.documents ?? []) {
       const extracted = await extractTextFromUrl(d.url, d.filename, d.contentType);
       docRows.push({
         filename: d.filename,
@@ -81,12 +100,28 @@ export async function POST(request: Request): Promise<NextResponse> {
       });
       if (extracted.text) policyDocs.push({ filename: d.filename, text: extracted.text });
     }
+
+    for (const link of parsed.data.links ?? []) {
+      const label = labelFromUrl(link);
+      const extracted = await extractTextFromWebUrl(link);
+      docRows.push({
+        filename: label,
+        blobUrl: link,
+        extractedText: extracted.text || undefined,
+        extractionError: extracted.error,
+      });
+      if (extracted.text) policyDocs.push({ filename: label, text: extracted.text });
+    }
+
     await addDocuments(accountId, assessment.id, docRows);
 
     if (!policyDocs.length) {
       await setStatus(assessment.id, "failed");
       return NextResponse.json(
-        { error: "We couldn't read any text from those files. If they're scanned PDFs, try a text-based export." },
+        {
+          error:
+            "We couldn't read any text from those documents. If a file is a scanned PDF, try a text-based export; if it's a link, make sure the page is public.",
+        },
         { status: 422 },
       );
     }
