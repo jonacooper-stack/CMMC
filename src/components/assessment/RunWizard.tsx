@@ -4,9 +4,10 @@ import { useState } from "react";
 import { upload } from "@vercel/blob/client";
 import { Eyebrow } from "@/components/ui";
 import DualResults from "./DualResults";
+import InterviewWizard from "./InterviewWizard";
 import type { DualScoreResult, Finding } from "@/lib/sprs/types";
 
-type Step = "upload" | "processing" | "results" | "error";
+type Step = "upload" | "processing" | "results" | "error" | "interview";
 
 const ACCEPT = ".pdf,.docx,.txt,.md";
 
@@ -19,6 +20,7 @@ export default function RunWizard() {
   const [result, setResult] = useState<DualScoreResult | null>(null);
   const [findings, setFindings] = useState<Finding[]>([]);
   const [aiAnalyzed, setAiAnalyzed] = useState(true);
+  const [assessmentId, setAssessmentId] = useState<string | null>(null);
 
   async function run() {
     if (!files.length || !attested) return;
@@ -78,6 +80,7 @@ export default function RunWizard() {
       setResult(data.result as DualScoreResult);
       setFindings((data.findings as Finding[]) ?? []);
       setAiAnalyzed(data.aiAnalyzed !== false);
+      setAssessmentId((data.assessmentId as string) ?? null);
       setStep("results");
       if (typeof window !== "undefined") window.scrollTo({ top: 0 });
     } catch (e) {
@@ -93,8 +96,40 @@ export default function RunWizard() {
     }
   }
 
+  if (step === "interview" && assessmentId) {
+    return (
+      <InterviewWizard
+        assessmentId={assessmentId}
+        onComplete={(r, f) => {
+          setResult(r);
+          setFindings(f);
+          setStep("results");
+          if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+        }}
+        onCancel={() => {
+          setStep("results");
+          if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+        }}
+      />
+    );
+  }
+
   if (step === "results" && result) {
-    return <DualResults result={result} findings={findings} aiAnalyzed={aiAnalyzed} />;
+    return (
+      <DualResults
+        result={result}
+        findings={findings}
+        aiAnalyzed={aiAnalyzed}
+        onStartInterview={
+          assessmentId
+            ? () => {
+                setStep("interview");
+                if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+              }
+            : undefined
+        }
+      />
+    );
   }
 
   if (step === "processing") {

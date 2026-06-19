@@ -8,6 +8,7 @@ import {
   assessments,
   controlFindings,
   documents,
+  interviewQuestions,
   scoreSnapshots,
 } from "./schema";
 import type { DualScoreResult, Finding } from "@/lib/sprs/types";
@@ -73,6 +74,49 @@ export async function saveFindings(assessmentId: string, findings: Finding[]): P
 export async function saveSnapshot(assessmentId: string, result: DualScoreResult): Promise<void> {
   const db = getDb();
   await db.insert(scoreSnapshots).values({ assessmentId, result });
+}
+
+export type InterviewQuestionRow = typeof interviewQuestions.$inferSelect;
+
+/** Replace the interview questions for an assessment and return the saved rows. */
+export async function saveInterviewQuestions(
+  assessmentId: string,
+  items: { controlId: string; question: string }[],
+): Promise<InterviewQuestionRow[]> {
+  const db = getDb();
+  await db.delete(interviewQuestions).where(eq(interviewQuestions.assessmentId, assessmentId));
+  if (!items.length) return [];
+  return db
+    .insert(interviewQuestions)
+    .values(items.map((i) => ({ assessmentId, controlId: i.controlId, question: i.question })))
+    .returning();
+}
+
+export async function getInterviewQuestionsForAssessment(
+  assessmentId: string,
+): Promise<InterviewQuestionRow[]> {
+  const db = getDb();
+  return db.select().from(interviewQuestions).where(eq(interviewQuestions.assessmentId, assessmentId));
+}
+
+/** Record the respondent's answers against the stored questions. */
+export async function saveInterviewAnswers(
+  assessmentId: string,
+  answers: { controlId: string; answer: string }[],
+): Promise<void> {
+  const db = getDb();
+  const now = new Date();
+  for (const a of answers) {
+    await db
+      .update(interviewQuestions)
+      .set({ answer: a.answer, answeredAt: now })
+      .where(
+        and(
+          eq(interviewQuestions.assessmentId, assessmentId),
+          eq(interviewQuestions.controlId, a.controlId),
+        ),
+      );
+  }
 }
 
 export async function listAssessmentsForAccount(accountId: string): Promise<AssessmentRow[]> {

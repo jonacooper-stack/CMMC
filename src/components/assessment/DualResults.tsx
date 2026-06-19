@@ -95,13 +95,16 @@ export default function DualResults({
   result,
   findings = [],
   aiAnalyzed = true,
+  onStartInterview,
 }: {
   result: DualScoreResult;
   findings?: Finding[];
   aiAnalyzed?: boolean;
+  onStartInterview?: () => void;
 }) {
   const verdict = scoreVerdict(result.defensible.score);
   const coverage = computeCoverage(findings);
+  const hasGaps = findings.some((f) => f.status === "not_met" || f.needsClarification);
   const gaps = findings
     .filter((f) => f.status !== "met_evidence")
     .sort((a, b) => {
@@ -240,6 +243,24 @@ export default function DualResults({
             ))}
           </ul>
         </>
+      )}
+
+      {onStartInterview && hasGaps && (
+        <div className="mt-12 rounded-2xl border border-steel-500 bg-white p-7 sm:p-8">
+          <h2 className="text-2xl font-bold text-navy-900">Raise your score in a few minutes</h2>
+          <p className="mt-2 max-w-xl text-sm text-slate-600">
+            Some controls weren&rsquo;t covered by your documents &mdash; but you may already do them
+            in practice. Answer a short set of targeted questions and we&rsquo;ll fold your answers
+            into an updated score.
+          </p>
+          <button
+            type="button"
+            onClick={onStartInterview}
+            className="mt-5 inline-flex items-center justify-center rounded-lg bg-navy-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-800"
+          >
+            Answer gap questions
+          </button>
+        </div>
       )}
 
       <div className="mt-12 rounded-2xl border border-cleared-500 bg-cleared-50 p-7 sm:p-8">
