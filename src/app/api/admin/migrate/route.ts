@@ -88,23 +88,60 @@ const STATEMENTS: string[] = [
   `CREATE INDEX IF NOT EXISTS "snapshots_assessment_idx" ON "score_snapshots" ("assessment_id");`,
 ];
 
+/** First ~70 chars of a statement, for a readable per-statement report. */
+function label(statement: string): string {
+  const oneLine = statement.replace(/\s+/g, " ").trim();
+  return oneLine.length > 70 ? `${oneLine.slice(0, 70)}…` : oneLine;
+}
+
 async function runMigration(): Promise<NextResponse> {
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: "Sign in first, then reload this URL." }, { status: 401 });
-  }
+  let userId: string | null = null;
   try {
-    const db = getDb();
-    for (const statement of STATEMENTS) {
-      await db.execute(sql.raw(statement));
-    }
-    return NextResponse.json({ ok: true, message: "Database is set up. You can run an assessment now." });
+    ({ userId } = await auth());
   } catch (e) {
     return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : "Migration failed" },
+      { ok: false, error: `Auth check failed: ${e instanceof Error ? e.message : "unknown"}` },
       { status: 500 },
     );
   }
+  if (!userId) {
+    return NextResponse.json({ error: "Sign in first, then reload this URL." }, { status: 401 });
+  }
+
+  let db: ReturnType<typeof getDb>;
+  try {
+    db = getDb();
+  } catch (e) {
+    return NextResponse.json(
+      { ok: false, error: e instanceof Error ? e.message : "Database isn't configured." },
+      { status: 500 },
+    );
+  }
+
+  // Run each statement independently so one failure (e.g. an enum tweak a given
+  // Postgres build rejects) can't abort the whole migration — and report exactly
+  // what happened instead of a bare 500.
+  let applied = 0;
+  const failures: { statement: string; error: string }[] = [];
+  for (const statement of STATEMENTS) {
+    try {
+      await db.execute(sql.raw(statement));
+      applied += 1;
+    } catch (e) {
+      failures.push({ statement: label(statement), error: e instanceof Error ? e.message : "unknown" });
+    }
+  }
+
+  const ok = failures.length === 0;
+  return NextResponse.json({
+    ok,
+    message: ok
+      ? "Database is set up. You can run an assessment now."
+      : "Applied what it could; some statements failed — see failures below.",
+    applied,
+    total: STATEMENTS.length,
+    failures,
+  });
 }
 
 export async function GET(): Promise<NextResponse> {
