@@ -209,10 +209,3 @@ export async function analyzePolicies(documents: PolicyDocument[]): Promise<Find
     (c) => found.get(c.id) ?? defaultFinding(c.id, "Not addressed in the provided policies."),
   );
 }
-
-/** Bridge findings → the status map that computeDualScore expects. */
-export function findingsToStatusMap(findings: Finding[]): Record<string, FindingStatus> {
-  const map: Record<string, FindingStatus> = {};
-  for (const f of findings) map[f.controlId] = f.status;
-  return map;
-}

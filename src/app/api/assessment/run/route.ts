@@ -16,9 +16,9 @@ import {
   type NewDocument,
 } from "@/lib/db/queries";
 import { extractTextFromUrl, extractTextFromWebUrl } from "@/lib/parse/extract";
-import { analyzePolicies, findingsToStatusMap, type PolicyDocument } from "@/lib/ai/analyze";
+import { analyzePolicies, type PolicyDocument } from "@/lib/ai/analyze";
 import { hasAnthropicKey } from "@/lib/ai/client";
-import { computeDualScore } from "@/lib/sprs/scoring";
+import { computeDualScore, findingsToStatusMap } from "@/lib/sprs/scoring";
 import { CONTROLS } from "@/lib/sprs/controls";
 
 export const runtime = "nodejs";

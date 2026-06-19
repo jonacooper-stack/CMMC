@@ -91,11 +91,12 @@ export const MAX_SCORE = 110;
 export const MIN_SCORE = -203;
 
 /**
- * Richer 4-state status used by the AI policy analysis (and the future
- * evidence-aware questionnaire). Distinguishes whether a "yes" has an auditable
- * evidence trail — exactly the gap Muster closes.
+ * Richer status used by the AI policy analysis and the evidence interview. The
+ * "met_*" split distinguishes whether a "yes" has an auditable evidence trail —
+ * exactly the gap Muster closes. "na" (not applicable) is excluded from scoring
+ * for controls that genuinely don't apply (e.g. a shop with no internal network).
  */
-export type FindingStatus = "met_evidence" | "met_no_evidence" | "partial" | "not_met";
+export type FindingStatus = "met_evidence" | "met_no_evidence" | "partial" | "not_met" | "na";
 
 /** A per-control finding from AI policy analysis, the clarifying interview, or manual entry. */
 export type Finding = {

@@ -1,11 +1,13 @@
 /**
- * Clarifying-interview endpoint for an assessment.
- * - GET  ?assessmentId=…  → the gap questions (generated + persisted on first call).
+ * Evidence interview for an assessment.
+ * - GET  ?assessmentId=…  → one question per not-yet-audit-ready control
+ *   (generated + persisted on first call).
  * - POST { assessmentId, answers } → fold answers into the findings, re-score, persist.
  *
- * A "yes" becomes a `met_no_evidence` finding: it counts toward the self-assessed
- * score but is flagged as at-risk until documented — exactly the evidence gap the
- * product is built around. Re-scoring is deterministic (no second AI pass).
+ * Each answer captures BOTH practice and evidence and maps straight to a
+ * scoreable state: "documented" → met_evidence (lifts the defensible/audit-ready
+ * score), "informal" → met_no_evidence (lifts self-assessed only), "no" →
+ * not_met. Re-scoring is deterministic (no second AI pass).
  */
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -19,10 +21,9 @@ import {
   saveSnapshot,
   setStatus,
 } from "@/lib/db/queries";
-import { gapControls } from "@/lib/sprs/coverage";
+import { interviewControls } from "@/lib/sprs/coverage";
 import { generateInterviewQuestions } from "@/lib/ai/interview";
-import { computeDualScore } from "@/lib/sprs/scoring";
-import { findingsToStatusMap } from "@/lib/ai/analyze";
+import { computeDualScore, findingsToStatusMap } from "@/lib/sprs/scoring";
 import { CONTROLS } from "@/lib/sprs/controls";
 import { FAMILY_BY_ID } from "@/lib/sprs/families";
 import type { Finding, FindingStatus } from "@/lib/sprs/types";
@@ -66,7 +67,7 @@ export async function GET(request: Request): Promise<NextResponse> {
   // from the current gaps and persist so refreshes are stable.
   let rows = await getInterviewQuestionsForAssessment(assessmentId);
   if (!rows.length) {
-    const gaps = gapControls(data.findings.map(toFinding));
+    const gaps = interviewControls(data.findings.map(toFinding));
     const generated = await generateInterviewQuestions(gaps);
     if (generated.length) rows = await saveInterviewQuestions(assessmentId, generated);
   }
@@ -84,16 +85,20 @@ export async function GET(request: Request): Promise<NextResponse> {
   return NextResponse.json({ questions });
 }
 
-const RESPONSE_TO_STATUS: Record<"yes" | "partial" | "no", FindingStatus> = {
-  yes: "met_no_evidence",
-  partial: "partial",
+type Response = "documented" | "informal" | "no" | "na";
+
+const RESPONSE_TO_STATUS: Record<Response, FindingStatus> = {
+  documented: "met_evidence",
+  informal: "met_no_evidence",
   no: "not_met",
+  na: "na",
 };
 
-const RATIONALE: Record<"yes" | "partial" | "no", string> = {
-  yes: "Confirmed in the clarifying interview — not yet documented.",
-  partial: "Partially in place per the clarifying interview.",
-  no: "Confirmed not in place in the clarifying interview.",
+const RATIONALE: Record<Response, string> = {
+  documented: "Self-reported in the evidence interview: done, documented, with records.",
+  informal: "Self-reported in the evidence interview: done, but not yet documented.",
+  no: "Self-reported in the evidence interview: not in place yet.",
+  na: "Marked not applicable in the evidence interview.",
 };
 
 const bodySchema = z.object({
@@ -102,8 +107,7 @@ const bodySchema = z.object({
     .array(
       z.object({
         controlId: z.string(),
-        response: z.enum(["yes", "partial", "no"]),
-        note: z.string().max(2000).optional(),
+        response: z.enum(["documented", "informal", "no", "na"]),
       }),
     )
     .min(1),
@@ -130,7 +134,7 @@ export async function POST(request: Request): Promise<NextResponse> {
         controlId: a.controlId,
         status: RESPONSE_TO_STATUS[a.response],
         source: "interview",
-        rationale: a.note?.trim() || RATIONALE[a.response],
+        rationale: RATIONALE[a.response],
         needsClarification: false,
       });
     }
@@ -142,10 +146,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     await saveSnapshot(assessmentId, result);
     await saveInterviewAnswers(
       assessmentId,
-      answers.map((a) => ({
-        controlId: a.controlId,
-        answer: a.note?.trim() ? `${a.response}: ${a.note.trim()}` : a.response,
-      })),
+      answers.map((a) => ({ controlId: a.controlId, answer: a.response })),
     );
     await setStatus(assessmentId, "complete");
 

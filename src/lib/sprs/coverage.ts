@@ -53,15 +53,20 @@ export function computeCoverage(findings: Finding[]): Coverage {
     const controls = controlsInFamily(fam.id);
     let addressed = 0;
     let needsClarification = 0;
+    let naCount = 0;
     for (const c of controls) {
       const f = byId.get(c.id);
+      if (f?.status === "na") {
+        naCount += 1;
+        continue; // not applicable — out of the denominator
+      }
       if (f && ADDRESSED.has(f.status)) addressed += 1;
       if (f?.needsClarification) needsClarification += 1;
     }
-    const total = controls.length;
+    const total = controls.length - naCount; // applicable controls only
     const ratio = total ? addressed / total : 0;
     const status: CoverageStatus =
-      addressed === 0 ? "missing" : ratio >= 0.6 ? "covered" : "partial";
+      total === 0 ? "covered" : addressed === 0 ? "missing" : ratio >= 0.6 ? "covered" : "partial";
     return { id: fam.id, name: fam.name, intro: fam.intro, total, addressed, needsClarification, status };
   });
 
@@ -75,17 +80,19 @@ export function computeCoverage(findings: Finding[]): Coverage {
 }
 
 /**
- * The controls worth asking about in the clarifying interview: those the
- * policies didn't cover (not_met) or the analyzer was unsure about
- * (needs_clarification). Highest SPRS weight first, capped so the interview
- * stays short and high-impact.
+ * The controls worth asking about in the evidence interview: anything not
+ * already audit-ready (i.e. not "met_evidence"). This deliberately includes
+ * "met_no_evidence" — the controls a policy asserts but the analyzer couldn't
+ * see proof for — because confirming they're documented with an audit trail is
+ * exactly what lifts them to met_evidence (the defensible score). Highest SPRS
+ * weight first, capped so the interview stays focused on the biggest wins.
  */
-export function gapControls(findings: Finding[], cap = 15): Control[] {
+export function interviewControls(findings: Finding[], cap = 30): Control[] {
   const byId = new Map(findings.map((f) => [f.controlId, f] as const));
   return CONTROLS.filter((c) => {
     const f = byId.get(c.id);
-    if (!f) return true; // unanalyzed → treat as a gap
-    return f.status === "not_met" || f.needsClarification === true;
+    if (!f) return true; // unanalyzed → worth asking
+    return f.status !== "met_evidence" && f.status !== "na";
   })
     .filter((c) => c.weight > 0) // skip the 0-point NA/gating control
     .sort(

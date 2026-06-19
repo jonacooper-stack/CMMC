@@ -160,6 +160,7 @@ export default function RunWizard() {
     return (
       <InterviewWizard
         assessmentId={assessmentId}
+        baseFindings={findings}
         onComplete={(r, f) => {
           setResult(r);
           setFindings(f);

@@ -10,6 +10,7 @@ import {
   type ControlStatus,
   type DualScoreResult,
   type FamilyPosture,
+  type Finding,
   type FindingStatus,
   type RemediationItem,
   type ScoreResult,
@@ -43,6 +44,8 @@ export function findingToControlStatus(
       return "partial";
     case "not_met":
       return "not_met";
+    case "na":
+      return "na";
   }
 }
 
@@ -206,4 +209,11 @@ export function scoreVerdict(score: number): { label: string; summary: string } 
     summary:
       "A negative score is common for shops just getting started — it simply means several high-weight controls aren't in place yet. The remediation plan below is your roadmap.",
   };
+}
+
+/** Bridge findings → the status map computeDualScore expects (latest wins). */
+export function findingsToStatusMap(findings: Finding[]): Record<string, FindingStatus> {
+  const map: Record<string, FindingStatus> = {};
+  for (const f of findings) map[f.controlId] = f.status;
+  return map;
 }

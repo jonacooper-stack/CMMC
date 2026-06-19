@@ -34,6 +34,7 @@ export const findingStatusEnum = pgEnum("finding_status", [
   "met_no_evidence",
   "partial",
   "not_met",
+  "na",
 ]);
 export const findingSourceEnum = pgEnum("finding_source", ["ai_policy", "interview", "manual"]);
 

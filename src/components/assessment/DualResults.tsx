@@ -5,135 +5,13 @@ import Link from "next/link";
 import { CONTROLS } from "@/lib/sprs/controls";
 import { FAMILY_BY_ID } from "@/lib/sprs/families";
 import { scoreVerdict } from "@/lib/sprs/scoring";
-import { computeCoverage, gapControls, type FamilyCoverage } from "@/lib/sprs/coverage";
+import { computeCoverage, interviewControls, type FamilyCoverage } from "@/lib/sprs/coverage";
 import { POLICY_BY_FAMILY } from "@/lib/policies/library";
 import type { DualScoreResult, Finding, FindingStatus } from "@/lib/sprs/types";
+import { ScoreGauge } from "./ScoreGauge";
 
 const TITLE = new Map(CONTROLS.map((c) => [c.id, c.title]));
 const CONTROL_BY_ID = new Map(CONTROLS.map((c) => [c.id, c] as const));
-
-const GAUGE_MIN = -203;
-const GAUGE_MAX = 110;
-const gaugePct = (s: number) =>
-  ((Math.max(GAUGE_MIN, Math.min(GAUGE_MAX, s)) - GAUGE_MIN) / (GAUGE_MAX - GAUGE_MIN)) * 100;
-const labelPct = (p: number) => Math.max(7, Math.min(93, p)); // keep edge labels in-bounds
-
-/**
- * A bad → good thermometer for the punishing −203…110 SPRS scale. Both scores
- * are marked on it and the evidence gap is shaded between them, so a raw number
- * turns into "where am I, and how far to the goal".
- */
-function ScoreGauge({ defensible, selfAssessed }: { defensible: number; selfAssessed: number }) {
-  const dPos = gaugePct(defensible);
-  const sPos = gaugePct(selfAssessed);
-  const zeroPos = gaugePct(0);
-  const passPos = gaugePct(88);
-  const progress = Math.round((Math.max(0, Math.min(110, defensible)) / 110) * 100);
-  const to110 = Math.max(0, 110 - defensible);
-  const to88 = Math.max(0, 88 - defensible);
-  const hasGap = selfAssessed > defensible;
-
-  return (
-    <div className="mt-6 rounded-2xl border border-line bg-white p-6">
-      {/* value pill above the audit-ready marker */}
-      <div className="relative mb-1.5 h-6">
-        <div
-          className="absolute -translate-x-1/2 rounded-md bg-navy-900 px-2 py-0.5 text-sm font-bold text-white"
-          style={{ left: `${labelPct(dPos)}%` }}
-        >
-          {defensible}
-        </div>
-      </div>
-
-      {/* zoned track */}
-      <div className="relative h-4 w-full overflow-hidden rounded-full">
-        <div className="absolute inset-y-0 left-0 bg-rose-400" style={{ width: `${zeroPos}%` }} />
-        <div
-          className="absolute inset-y-0 bg-amber-400"
-          style={{ left: `${zeroPos}%`, width: `${passPos - zeroPos}%` }}
-        />
-        <div className="absolute inset-y-0 right-0 bg-cleared-500" style={{ left: `${passPos}%` }} />
-        {hasGap && (
-          <div
-            className="absolute inset-y-0 bg-navy-900/15"
-            style={{ left: `${dPos}%`, width: `${sPos - dPos}%` }}
-          />
-        )}
-        <div
-          className="absolute inset-y-0 w-1 -translate-x-1/2 bg-navy-900"
-          style={{ left: `${dPos}%` }}
-        />
-        {hasGap && (
-          <div
-            className="absolute inset-y-0 w-0.5 -translate-x-1/2 bg-navy-900/50"
-            style={{ left: `${sPos}%` }}
-          />
-        )}
-      </div>
-
-      {/* numeric ticks */}
-      <div className="relative mt-1.5 h-4 text-[10px] text-slate-400">
-        <span className="absolute left-0">−203</span>
-        <span className="absolute -translate-x-1/2" style={{ left: `${zeroPos}%` }}>
-          0
-        </span>
-        <span
-          className="absolute -translate-x-1/2 font-semibold text-cleared-700"
-          style={{ left: `${labelPct(passPos)}%` }}
-        >
-          88
-        </span>
-        <span className="absolute right-0">110</span>
-      </div>
-
-      {/* zone names */}
-      <div className="relative mt-1 h-4 text-[11px] font-medium text-slate-400">
-        <span className="absolute -translate-x-1/2" style={{ left: `${zeroPos / 2}%` }}>
-          Early stage
-        </span>
-        <span className="absolute -translate-x-1/2" style={{ left: `${(zeroPos + passPos) / 2}%` }}>
-          Material gaps
-        </span>
-        <span
-          className="absolute -translate-x-1/2 text-cleared-700"
-          style={{ left: `${labelPct((passPos + 100) / 2)}%` }}
-        >
-          Strong
-        </span>
-      </div>
-
-      <div className="mt-4 border-t border-line pt-4">
-        <p className="text-sm text-slate-600">
-          You&rsquo;re about <strong className="text-navy-900">{progress}%</strong> of the way to a
-          perfect 110
-          {to110 > 0 ? (
-            <>
-              {" "}
-              &mdash; <strong className="text-navy-900">{to110}</strong> points to go
-              {to88 > 0 ? <>, {to88} to a conditional pass (88)</> : null}.
-            </>
-          ) : (
-            <>.</>
-          )}
-        </p>
-        <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-slate-500">
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block h-3 w-1 rounded-sm bg-navy-900" aria-hidden /> Audit-ready{" "}
-            <strong className="text-navy-900">{defensible}</strong> &mdash; only what you can prove
-            today
-          </span>
-          {hasGap && (
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block h-3 w-0.5 rounded-sm bg-navy-900/50" aria-hidden />{" "}
-              Self-assessed <strong className="text-navy-900">{selfAssessed}</strong> &mdash; what
-              your policies claim
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 const COVERAGE_META: Record<FamilyCoverage["status"], { label: string; dot: string; text: string }> = {
   covered: { label: "Covered", dot: "bg-cleared-600", text: "text-cleared-700" },
@@ -141,7 +19,7 @@ const COVERAGE_META: Record<FamilyCoverage["status"], { label: string; dot: stri
   missing: { label: "Missing", dot: "bg-slate-300", text: "text-slate-500" },
 };
 
-type GapStatus = Exclude<FindingStatus, "met_evidence">;
+type GapStatus = Exclude<FindingStatus, "met_evidence" | "na">;
 type PolicyGap = { id: string; title: string; status: GapStatus };
 
 const GAP_STATUS: Record<GapStatus, { label: string; cls: string }> = {
@@ -254,7 +132,7 @@ export default function DualResults({
   const verdict = scoreVerdict(result.defensible.score);
   const coverage = computeCoverage(findings);
   const gaps = findings
-    .filter((f) => f.status !== "met_evidence")
+    .filter((f) => f.status !== "met_evidence" && f.status !== "na")
     .sort(
       (a, b) =>
         (CONTROL_BY_ID.get(b.controlId)?.weight ?? 0) -
@@ -262,10 +140,10 @@ export default function DualResults({
     )
     .slice(0, 10);
 
-  const gapCount = gapControls(findings).length;
+  const gapCount = interviewControls(findings).length;
   const familyGaps = new Map<string, PolicyGap[]>();
   for (const f of findings) {
-    if (f.status === "met_evidence") continue;
+    if (f.status === "met_evidence" || f.status === "na") continue;
     const ctrl = CONTROL_BY_ID.get(f.controlId);
     if (!ctrl) continue;
     const list = familyGaps.get(ctrl.family) ?? [];
@@ -339,11 +217,14 @@ export default function DualResults({
         <div className="mt-6 rounded-2xl border-2 border-navy-900/15 bg-paper p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-lg font-bold text-navy-900">Raise your score in a few minutes</h2>
+              <h2 className="text-lg font-bold text-navy-900">
+                Confirm what&rsquo;s documented &mdash; and watch your score climb
+              </h2>
               <p className="mt-1 max-w-xl text-sm text-slate-600">
-                Some controls weren&rsquo;t covered by your documents &mdash; but you may already do
-                them in practice. Answer {gapCount} quick question{gapCount === 1 ? "" : "s"} and
-                we&rsquo;ll fold your answers into an updated score.
+                Your audit-ready score only counts controls you can prove with a documented evidence
+                trail, so policies you have but can&rsquo;t yet show don&rsquo;t count. Answer{" "}
+                {gapCount} quick question{gapCount === 1 ? "" : "s"} about what&rsquo;s documented and
+                your score updates live.
               </p>
             </div>
             <button
@@ -351,7 +232,7 @@ export default function DualResults({
               onClick={onStartInterview}
               className="inline-flex flex-none items-center justify-center gap-2 rounded-lg bg-navy-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-800"
             >
-              Answer questions <span aria-hidden>&rarr;</span>
+              Start the evidence check <span aria-hidden>&rarr;</span>
             </button>
           </div>
         </div>
