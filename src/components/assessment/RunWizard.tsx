@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { upload } from "@vercel/blob/client";
 import { Eyebrow } from "@/components/ui";
 import DualResults from "./DualResults";
@@ -21,6 +21,24 @@ export default function RunWizard() {
   const [findings, setFindings] = useState<Finding[]>([]);
   const [aiAnalyzed, setAiAnalyzed] = useState(true);
   const [assessmentId, setAssessmentId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Append newly picked files to the existing selection (deduped by name+size)
+  // so opening the picker again adds to the list instead of replacing it.
+  function addFiles(selected: FileList | null) {
+    if (!selected?.length) return;
+    setFiles((prev) => {
+      const seen = new Set(prev.map((f) => `${f.name}:${f.size}`));
+      const additions = Array.from(selected).filter((f) => !seen.has(`${f.name}:${f.size}`));
+      return [...prev, ...additions];
+    });
+    // Clear the native input so re-picking the same file still fires onChange.
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function removeFile(name: string, size: number) {
+    setFiles((prev) => prev.filter((f) => !(f.name === name && f.size === size)));
+  }
 
   async function run() {
     if (!files.length || !attested) return;
@@ -195,20 +213,47 @@ export default function RunWizard() {
       </div>
 
       <div className="mt-6 rounded-2xl border border-line bg-white p-6">
-        <label className="block text-sm font-medium text-navy-900">Policy documents</label>
-        <input
-          type="file"
-          multiple
-          accept={ACCEPT}
-          onChange={(e) => setFiles(e.target.files ? Array.from(e.target.files) : [])}
-          className="mt-2 block w-full text-sm text-slate-600 file:mr-4 file:rounded-lg file:border-0 file:bg-navy-900 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-navy-800"
-        />
+        <p className="text-sm font-medium text-navy-900">Policy documents</p>
+
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <input
+            ref={fileInputRef}
+            id="policy-files"
+            type="file"
+            multiple
+            accept={ACCEPT}
+            onChange={(e) => addFiles(e.target.files)}
+            className="sr-only"
+          />
+          <label
+            htmlFor="policy-files"
+            className="inline-flex cursor-pointer items-center rounded-lg bg-navy-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-navy-800"
+          >
+            {files.length ? "Add more files" : "Choose files"}
+          </label>
+          <span className="text-sm text-slate-500">
+            {files.length
+              ? `${files.length} file${files.length === 1 ? "" : "s"} selected`
+              : "PDF, Word, or text"}
+          </span>
+        </div>
+
         {files.length > 0 && (
           <ul className="mt-3 space-y-1 text-sm text-slate-600">
             {files.map((f) => (
-              <li key={f.name} className="flex justify-between gap-3">
+              <li key={`${f.name}:${f.size}`} className="flex items-center justify-between gap-3">
                 <span className="truncate">{f.name}</span>
-                <span className="flex-none text-slate-400">{Math.ceil(f.size / 1024)} KB</span>
+                <span className="flex flex-none items-center gap-3">
+                  <span className="text-slate-400">{Math.ceil(f.size / 1024)} KB</span>
+                  <button
+                    type="button"
+                    onClick={() => removeFile(f.name, f.size)}
+                    aria-label={`Remove ${f.name}`}
+                    className="font-medium text-slate-400 transition-colors hover:text-amber-600"
+                  >
+                    Remove
+                  </button>
+                </span>
               </li>
             ))}
           </ul>
