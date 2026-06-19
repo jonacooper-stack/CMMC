@@ -5,10 +5,15 @@
  */
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
+// NOTE: /api/uploads is deliberately NOT protected here. It receives a
+// server-to-server `blob.upload-completed` webhook from Vercel Blob that is
+// authenticated by an `x-vercel-signature` header and carries no Clerk session.
+// Gating it with auth.protect() rejects that callback, so Vercel never gets its
+// completion confirmation and the browser's upload() hangs forever. Auth for
+// minting an upload token is enforced inside the route's onBeforeGenerateToken.
 const isProtectedRoute = createRouteMatcher([
   "/dashboard(.*)",
   "/assessment/run(.*)",
-  "/api/uploads(.*)",
   "/api/assessment/run(.*)",
 ]);
 

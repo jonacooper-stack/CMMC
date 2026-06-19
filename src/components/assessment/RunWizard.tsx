@@ -25,24 +25,32 @@ export default function RunWizard() {
     setPhase("uploading");
     setError("");
 
-    // --- Upload phase: files go straight from the browser to Blob storage. ---
+    // --- Upload phase: files go straight from the browser to Blob storage.
+    // Hard timeout so a stalled upload surfaces an error instead of spinning forever. ---
     const uploaded: { url: string; filename: string; contentType?: string }[] = [];
+    const uploadController = new AbortController();
+    const uploadTimeout = setTimeout(() => uploadController.abort(), 120_000);
     try {
       for (const file of files) {
         const blob = await upload(file.name, file, {
           access: "public",
           handleUploadUrl: "/api/uploads",
           contentType: file.type || undefined,
+          abortSignal: uploadController.signal,
         });
         uploaded.push({ url: blob.url, filename: file.name, contentType: file.type || undefined });
       }
     } catch (e) {
       setError(
-        `Couldn't upload your files: ${e instanceof Error ? e.message : "unknown error"}. ` +
-          "This usually means Blob storage isn't connected to the project yet.",
+        uploadController.signal.aborted
+          ? "The upload timed out before finishing. Check your connection and that Blob storage is connected to the project, then try again."
+          : `Couldn't upload your files: ${e instanceof Error ? e.message : "unknown error"}. ` +
+              "This usually means Blob storage isn't connected to the project yet.",
       );
       setStep("error");
       return;
+    } finally {
+      clearTimeout(uploadTimeout);
     }
 
     // --- Analyze phase. Hard timeout so the spinner can never hang forever. ---

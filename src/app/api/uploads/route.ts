@@ -4,6 +4,7 @@
  * only mints a short-lived upload token. The document record + text extraction
  * happen later in the analyze step.
  */
+import { auth } from "@clerk/nextjs/server";
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { NextResponse } from "next/server";
 
@@ -41,8 +42,14 @@ export async function POST(request: Request): Promise<NextResponse> {
       body,
       request,
       onBeforeGenerateToken: async () => {
-        // TODO (Clerk step): require an authenticated account before minting a
-        // token, and stamp the accountId into tokenPayload.
+        // Only signed-in users may mint an upload token. This check lives here —
+        // not in proxy.ts — so the unauthenticated (but signature-verified)
+        // blob.upload-completed webhook can still reach this route. This branch
+        // only runs for the browser's token request, never for that callback.
+        const { userId } = await auth();
+        if (!userId) {
+          throw new Error("You must be signed in to upload documents.");
+        }
         return {
           allowedContentTypes: ALLOWED_CONTENT_TYPES,
           maximumSizeInBytes: MAX_BYTES,
