@@ -9,11 +9,13 @@ import type { Answers, Control, ControlStatus } from "@/lib/sprs/types";
 import Results from "./Results";
 
 const STORAGE_KEY = "muster.sprs.answers.v1";
+const NOTES_KEY = "muster.sprs.notes.v1";
 
 const OPTIONS: { value: ControlStatus; label: string }[] = [
   { value: "met", label: "Yes" },
   { value: "partial", label: "Partly" },
   { value: "not_met", label: "No" },
+  { value: "na", label: "N/A" },
 ];
 
 const scrollTop = (smooth = false) => {
@@ -24,29 +26,37 @@ const scrollTop = (smooth = false) => {
 
 export default function Questionnaire() {
   const [answers, setAnswers] = useState<Answers>({});
+  const [notes, setNotes] = useState<Record<string, string>>({});
   const [step, setStep] = useState(0);
   const [done, setDone] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
-  // Restore in-progress answers so a refresh doesn't lose work.
+  // Restore in-progress answers/notes after mount. Starting empty on both the
+  // server and the client's first render avoids a hydration mismatch, so we
+  // populate from localStorage here rather than in a lazy initializer.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setAnswers(JSON.parse(raw) as Answers);
+      const rawNotes = localStorage.getItem(NOTES_KEY);
+      if (rawNotes) setNotes(JSON.parse(rawNotes) as Record<string, string>);
     } catch {
       /* ignore unparsable/blocked storage */
     }
     setLoaded(true);
   }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
     if (!loaded) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
+      localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
     } catch {
       /* ignore */
     }
-  }, [answers, loaded]);
+  }, [answers, notes, loaded]);
 
   const byFamily = useMemo(() => {
     const map = new Map<string, Control[]>();
@@ -72,6 +82,10 @@ export default function Questionnaire() {
     setAnswers((prev) => ({ ...prev, [id]: value }));
   }
 
+  function setNote(id: string, value: string) {
+    setNotes((prev) => ({ ...prev, [id]: value }));
+  }
+
   function go(next: number) {
     setStep(next);
     scrollTop(true);
@@ -79,10 +93,12 @@ export default function Questionnaire() {
 
   function restart() {
     setAnswers({});
+    setNotes({});
     setStep(0);
     setDone(false);
     try {
       localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(NOTES_KEY);
     } catch {
       /* ignore */
     }
@@ -156,6 +172,21 @@ export default function Questionnaire() {
                 })}
               </div>
             </div>
+            {(answers[c.id] === "na" ||
+              answers[c.id] === "partial" ||
+              answers[c.id] === "not_met") && (
+              <input
+                type="text"
+                value={notes[c.id] ?? ""}
+                onChange={(e) => setNote(c.id, e.target.value)}
+                placeholder={
+                  answers[c.id] === "na"
+                    ? "Why doesn't this apply? (e.g. remote-first — no internal network)"
+                    : "Add a note (optional)"
+                }
+                className="mt-3 block w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-steel-500 focus:outline-none"
+              />
+            )}
           </li>
         ))}
       </ul>
@@ -195,4 +226,5 @@ const SELECTED_CLS: Record<ControlStatus, string> = {
   met: "rounded-lg border border-cleared-500 bg-cleared-600 px-3 py-2 text-xs font-semibold text-white",
   partial: "rounded-lg border border-amber-500 bg-amber-500 px-3 py-2 text-xs font-semibold text-white",
   not_met: "rounded-lg border border-navy-900 bg-navy-900 px-3 py-2 text-xs font-semibold text-white",
+  na: "rounded-lg border border-slate-400 bg-slate-500 px-3 py-2 text-xs font-semibold text-white",
 };

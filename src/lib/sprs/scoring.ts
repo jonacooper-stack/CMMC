@@ -20,7 +20,7 @@ import { FAMILIES } from "./families";
 
 /** Points deducted for a single control given its answered status. */
 export function deductionFor(control: Control, status: ControlStatus): number {
-  if (status === "met") return 0;
+  if (status === "met" || status === "na") return 0;
   if (status === "partial") return control.partialWeight ?? control.weight;
   return control.weight;
 }
@@ -97,7 +97,7 @@ export function computeScore(controls: Control[], answers: Answers): ScoreResult
   const famPosture = new Map<string, FamilyPosture>(
     FAMILIES.map((f) => [
       f.id,
-      { id: f.id, name: f.name, total: 0, met: 0, partial: 0, notMet: 0, pointsLost: 0 },
+      { id: f.id, name: f.name, total: 0, met: 0, partial: 0, notMet: 0, na: 0, pointsLost: 0 },
     ]),
   );
   const remediation: RemediationItem[] = [];
@@ -107,6 +107,7 @@ export function computeScore(controls: Control[], answers: Answers): ScoreResult
   let metCount = 0;
   let partialCount = 0;
   let notMetCount = 0;
+  let naCount = 0;
 
   for (const control of controls) {
     const answer = answers[control.id];
@@ -114,6 +115,15 @@ export function computeScore(controls: Control[], answers: Answers): ScoreResult
     const status: ControlStatus = answer ?? "not_met";
 
     const fam = famPosture.get(control.family);
+
+    // Not applicable: drop it from the assessment — no deduction, and it does
+    // not count toward the family's applicable total or the gap list.
+    if (status === "na") {
+      naCount += 1;
+      if (fam) fam.na += 1;
+      continue;
+    }
+
     if (fam) fam.total += 1;
 
     if (status === "met") {
@@ -161,6 +171,7 @@ export function computeScore(controls: Control[], answers: Answers): ScoreResult
     metCount,
     partialCount,
     notMetCount,
+    naCount,
     pointsLost,
     byFamily: FAMILIES.map((f) => famPosture.get(f.id)!).filter((f) => f.total > 0),
     remediation,

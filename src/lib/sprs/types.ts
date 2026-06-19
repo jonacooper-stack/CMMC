@@ -34,8 +34,12 @@ export type Control = {
   note?: string;
 };
 
-/** How a respondent rates a single control. */
-export type ControlStatus = "met" | "partial" | "not_met";
+/**
+ * How a respondent rates a single control. "na" (not applicable) is excluded
+ * from scoring entirely — no deduction and not counted as a gap — for controls
+ * that genuinely don't apply (e.g. a remote-first shop with no internal network).
+ */
+export type ControlStatus = "met" | "partial" | "not_met" | "na";
 
 /** Answers keyed by control id. A missing entry is treated as `not_met`. */
 export type Answers = Record<string, ControlStatus | undefined>;
@@ -43,10 +47,13 @@ export type Answers = Record<string, ControlStatus | undefined>;
 export type FamilyPosture = {
   id: string;
   name: string;
+  /** Applicable controls in this family (excludes any marked N/A). */
   total: number;
   met: number;
   partial: number;
   notMet: number;
+  /** Controls marked not applicable. */
+  na: number;
   /** Points lost in this family (sum of deductions). */
   pointsLost: number;
 };
@@ -55,7 +62,7 @@ export type RemediationItem = {
   id: string;
   family: string;
   title: string;
-  status: Exclude<ControlStatus, "met">;
+  status: Exclude<ControlStatus, "met" | "na">;
   /** Points recoverable by bringing this control to "met". */
   points: number;
 };
@@ -71,6 +78,8 @@ export type ScoreResult = {
   metCount: number;
   partialCount: number;
   notMetCount: number;
+  /** Controls marked not applicable (excluded from scoring). */
+  naCount: number;
   /** Total points below 110 (before clamping). */
   pointsLost: number;
   byFamily: FamilyPosture[];

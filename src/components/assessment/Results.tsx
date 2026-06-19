@@ -5,7 +5,7 @@ import { FAMILY_BY_ID } from "@/lib/sprs/families";
 import { scoreVerdict } from "@/lib/sprs/scoring";
 import type { ControlStatus, ScoreResult } from "@/lib/sprs/types";
 
-const STATUS_LABEL: Record<Exclude<ControlStatus, "met">, string> = {
+const STATUS_LABEL: Record<Exclude<ControlStatus, "met" | "na">, string> = {
   partial: "Partly in place",
   not_met: "Not in place",
 };
@@ -63,6 +63,7 @@ export default function Results({
         <Stat label="In place" value={result.metCount} />
         <Stat label="Partly" value={result.partialCount} />
         <Stat label="Not in place" value={result.notMetCount} />
+        {result.naCount > 0 && <Stat label="N/A" value={result.naCount} />}
       </div>
 
       <h2 className="mt-12 text-2xl font-bold">Fix these first</h2>
@@ -106,7 +107,8 @@ export default function Results({
                   <span className="font-mono text-xs text-steel-700">{f.id}</span> {f.name}
                 </span>
                 <span className="text-slate-500">
-                  {f.met}/{f.total} in place{f.pointsLost ? ` · −${f.pointsLost} pts` : ""}
+                  {f.met}/{f.total} in place{f.na ? ` · ${f.na} N/A` : ""}
+                  {f.pointsLost ? ` · −${f.pointsLost} pts` : ""}
                 </span>
               </div>
               <div className="mt-1.5 h-1.5 rounded-full bg-line">
