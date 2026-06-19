@@ -49,7 +49,8 @@ const STATEMENTS: string[] = [
   );`,
   // Migrate existing installs off the finding_status enum so statuses like "na"
   // insert without an ALTER TYPE ... ADD VALUE (which the serverless driver rejects).
-  `ALTER TABLE "control_findings" ALTER COLUMN "status" TYPE text;`,
+  // The USING cast is required to convert an enum column to text.
+  `ALTER TABLE "control_findings" ALTER COLUMN "status" TYPE text USING "status"::text;`,
   `CREATE TABLE IF NOT EXISTS "documents" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
     "assessment_id" uuid NOT NULL,
