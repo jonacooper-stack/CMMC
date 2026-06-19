@@ -16,7 +16,10 @@ import { getAnthropic, hasAnthropicKey, MODELS } from "./client";
 
 /** Cap on combined policy text sent to the model (keeps token cost bounded). */
 const MAX_POLICY_CHARS = 200_000;
-const FAMILY_CONCURRENCY = 4;
+/** Parallelism for the cache-warm fan-out (kept modest to avoid rate limits). */
+const FAMILY_CONCURRENCY = 6;
+/** Output cap per family — one short finding per control, so this is generous. */
+const MAX_OUTPUT_TOKENS = 4096;
 
 export type PolicyDocument = { filename: string; text: string };
 
@@ -111,7 +114,7 @@ async function analyzeFamily(
   const controlList = controls.map((c) => `${c.id} — ${c.title}`).join("\n");
   const res = await client.messages.create({
     model: MODELS.analysis,
-    max_tokens: 8192,
+    max_tokens: MAX_OUTPUT_TOKENS,
     system: [
       { type: "text", text: SYSTEM_INSTRUCTIONS },
       {
@@ -168,16 +171,40 @@ export async function analyzePolicies(documents: PolicyDocument[]): Promise<Find
   for (const f of FAMILIES) byFamily.set(f.id, []);
   for (const c of CONTROLS) byFamily.get(c.family)?.push(c);
 
+  // Warm the prompt cache with the first family: this single call writes the
+  // (potentially large) policy text to the ephemeral cache. If it fails — bad
+  // key, auth, or a rate limit that survived the SDK's retries — it's fatal for
+  // the whole run, so let it propagate to the route's error handler.
+  const [first, ...rest] = FAMILIES;
+  const warm = await analyzeFamily(
+    client,
+    first.id,
+    first.name,
+    byFamily.get(first.id) ?? [],
+    policyBlob,
+  );
+
+  // Fan the remaining families out concurrently; they read the warm cache, so
+  // fresh-input token pressure (the real rate-limit risk on big policy sets)
+  // stays low. A single family failing degrades to defaults for its controls
+  // rather than failing the whole assessment.
   const limit = pLimit(FAMILY_CONCURRENCY);
-  const results = await Promise.all(
-    FAMILIES.map((f) =>
-      limit(() => analyzeFamily(client, f.id, f.name, byFamily.get(f.id) ?? [], policyBlob)),
+  const restResults = await Promise.all(
+    rest.map((f) =>
+      limit(async () => {
+        try {
+          return await analyzeFamily(client, f.id, f.name, byFamily.get(f.id) ?? [], policyBlob);
+        } catch (e) {
+          console.error(`[analyze] family ${f.id} failed:`, e);
+          return [] as Finding[];
+        }
+      }),
     ),
   );
 
   // Reconcile: every control must have a finding; default any the model omitted.
   const found = new Map<string, Finding>();
-  for (const finding of results.flat()) found.set(finding.controlId, finding);
+  for (const finding of [warm, ...restResults].flat()) found.set(finding.controlId, finding);
   return CONTROLS.map(
     (c) => found.get(c.id) ?? defaultFinding(c.id, "Not addressed in the provided policies."),
   );

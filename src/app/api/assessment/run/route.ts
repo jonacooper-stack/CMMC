@@ -21,7 +21,8 @@ import { computeDualScore } from "@/lib/sprs/scoring";
 import { CONTROLS } from "@/lib/sprs/controls";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+// Headroom for the 14-pass policy analysis (capped to the platform plan limit).
+export const maxDuration = 300;
 
 const bodySchema = z.object({
   documents: z
@@ -87,6 +88,7 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     return NextResponse.json({ assessmentId: assessment.id, result, findings });
   } catch (e) {
+    console.error("[assessment/run] analysis failed:", e);
     await setStatus(assessment.id, "failed").catch(() => {});
     return NextResponse.json(
       { error: e instanceof Error ? e.message : "Analysis failed" },

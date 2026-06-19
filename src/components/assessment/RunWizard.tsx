@@ -12,6 +12,7 @@ const ACCEPT = ".pdf,.docx,.txt,.md";
 
 export default function RunWizard() {
   const [step, setStep] = useState<Step>("upload");
+  const [phase, setPhase] = useState<"uploading" | "analyzing">("uploading");
   const [files, setFiles] = useState<File[]>([]);
   const [attested, setAttested] = useState(false);
   const [error, setError] = useState("");
@@ -21,6 +22,7 @@ export default function RunWizard() {
   async function run() {
     if (!files.length || !attested) return;
     setStep("processing");
+    setPhase("uploading");
     setError("");
     try {
       const uploaded: { url: string; filename: string; contentType?: string }[] = [];
@@ -32,19 +34,47 @@ export default function RunWizard() {
         });
         uploaded.push({ url: blob.url, filename: file.name, contentType: file.type || undefined });
       }
-      const res = await fetch("/api/assessment/run", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ documents: uploaded }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Analysis failed.");
+
+      // Analyze. Guard with a hard client-side timeout so the spinner can never
+      // hang indefinitely if the network/gateway stalls.
+      setPhase("analyzing");
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 240_000);
+      let res: Response;
+      try {
+        res = await fetch("/api/assessment/run", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ documents: uploaded }),
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timeout);
+      }
+
+      // A gateway timeout (504) returns HTML, not JSON — parse defensively.
+      const data = await res.json().catch(() => null);
+      if (!res.ok) {
+        throw new Error(
+          data?.error ||
+            (res.status === 504
+              ? "The analysis timed out on the server. Your policy set may be very large — try fewer or smaller documents."
+              : `Analysis failed (HTTP ${res.status}).`),
+        );
+      }
       setResult(data.result as DualScoreResult);
       setFindings((data.findings as Finding[]) ?? []);
       setStep("results");
       if (typeof window !== "undefined") window.scrollTo({ top: 0 });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      const aborted = e instanceof DOMException && e.name === "AbortError";
+      setError(
+        aborted
+          ? "This is taking longer than expected. Your documents may be very large — try fewer or smaller files, or split the upload."
+          : e instanceof Error
+            ? e.message
+            : "Something went wrong.",
+      );
       setStep("error");
     }
   }
@@ -54,13 +84,17 @@ export default function RunWizard() {
   }
 
   if (step === "processing") {
+    const uploading = phase === "uploading";
     return (
       <div className="mx-auto max-w-xl py-10 text-center">
         <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-line border-t-cleared-600" />
-        <h2 className="mt-6 text-xl font-bold text-navy-900">Reviewing your policies…</h2>
+        <h2 className="mt-6 text-xl font-bold text-navy-900">
+          {uploading ? "Uploading your documents…" : "Reviewing your policies…"}
+        </h2>
         <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
-          We&rsquo;re reading your documents and checking them against all 110 NIST 800-171
-          controls. This usually takes up to a minute — hang tight.
+          {uploading
+            ? "Securely sending your files — this is usually quick."
+            : "We’re reading your documents and checking them against all 110 NIST 800-171 controls. This can take a minute or two for large policy sets — hang tight."}
         </p>
       </div>
     );
