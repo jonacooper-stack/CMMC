@@ -40,44 +40,44 @@ const QA = [
 
 export default function FAQ() {
   return (
-    <>
-      <section className="border-b border-line bg-white">
+    <div className="bg-navy-900 text-steel-200">
+      <section className="border-b border-white/5">
         <Container className="py-16 sm:py-20">
-          <Eyebrow>FAQ</Eyebrow>
-          <h1 className="mt-4 text-4xl font-bold sm:text-5xl">Straight answers.</h1>
+          <Eyebrow tone="dark">FAQ</Eyebrow>
+          <h1 className="mt-4 text-4xl font-bold text-white sm:text-5xl">Straight answers.</h1>
         </Container>
       </section>
 
-      <section className="bg-paper">
+      <section className="bg-navy-800">
         <Container className="py-16 sm:py-20">
           <div className="mx-auto max-w-3xl space-y-4">
             {QA.map((item) => (
               <details
                 key={item.q}
-                className="group rounded-xl border border-line bg-white p-6 open:ring-1 open:ring-steel-200"
+                className="group rounded-xl border border-white/10 bg-white/5 p-6 open:border-white/20"
               >
-                <summary className="cursor-pointer list-none text-lg font-semibold text-navy-900 marker:hidden">
+                <summary className="cursor-pointer list-none text-lg font-semibold text-white marker:hidden">
                   <span className="flex items-center justify-between gap-4">
                     {item.q}
-                    <span className="text-steel-500 transition-transform group-open:rotate-45">+</span>
+                    <span className="text-cleared-500 transition-transform group-open:rotate-45">+</span>
                   </span>
                 </summary>
-                <p className="mt-3 text-sm leading-relaxed text-slate-600">{item.a}</p>
+                <p className="mt-3 text-sm leading-relaxed text-steel-200/80">{item.a}</p>
               </details>
             ))}
           </div>
         </Container>
       </section>
 
-      <section className="bg-white">
+      <section className="border-t border-white/5">
         <Container className="py-16 text-center">
-          <h2 className="mx-auto max-w-2xl text-3xl font-bold">Still have a question?</h2>
+          <h2 className="mx-auto max-w-2xl text-3xl font-bold text-white">Still have a question?</h2>
           <div className="mt-7 flex justify-center gap-3">
-            <CTA href="/contact" variant="ghost">Talk to us</CTA>
+            <CTA href="/contact" variant="outline">Talk to us</CTA>
             <CTA href="/assessment/run">Get your free assessment</CTA>
           </div>
         </Container>
       </section>
-    </>
+    </div>
   );
 }

@@ -26,9 +26,9 @@ const STEPS = [
 
 export default function Home() {
   return (
-    <>
+    <div className="bg-navy-900 text-steel-200">
       {/* Hero */}
-      <section className="relative overflow-hidden bg-navy-900 text-steel-200">
+      <section className="relative overflow-hidden">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-[0.06]"
@@ -74,18 +74,18 @@ export default function Home() {
       </section>
 
       {/* Stakes */}
-      <section className="bg-paper">
+      <section className="border-t border-white/5 bg-navy-800">
         <Container className="py-16 sm:py-24">
           <div className="max-w-3xl">
-            <Eyebrow>The problem</Eyebrow>
-            <h2 className="mt-4 text-3xl font-bold sm:text-4xl">
+            <Eyebrow tone="dark">The problem</Eyebrow>
+            <h2 className="mt-4 text-3xl font-bold text-white sm:text-4xl">
               A blank or stale SPRS score can freeze your purchase orders &mdash; today.
             </h2>
-            <p className="mt-5 text-lg leading-relaxed text-slate-600">
+            <p className="mt-5 text-lg leading-relaxed text-steel-200/80">
               Under DFARS 7012/7019/7020, every subcontractor that touches CUI
               has to keep a current SPRS score, a live SSP and POA&amp;M, and
               answer its primes&rsquo; security questionnaires. Miss it and the
-              POs stop. Then, from <strong>Nov 10, 2026</strong>, CMMC Level 2
+              POs stop. Then, from <strong className="text-white">Nov 10, 2026</strong>, CMMC Level 2
               certification starts gating new contracts.
             </p>
           </div>
@@ -95,13 +95,13 @@ export default function Home() {
               "Your last consultant handed you a binder and left — now it’s out of date.",
               "You don’t have a security team, and the owner is the one losing sleep.",
             ].map((t) => (
-              <div key={t} className="rounded-xl border border-line bg-white p-6">
-                <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-md bg-amber-50 text-amber-500">
+              <div key={t} className="rounded-xl border border-white/10 bg-white/5 p-6">
+                <div className="mb-3 inline-flex h-8 w-8 items-center justify-center rounded-md bg-amber-500/15 text-amber-500">
                   <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" aria-hidden>
                     <path d="M10 2.5l7.5 13h-15l7.5-13zM10 8v3.5M10 14h.01" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
-                <p className="text-sm leading-relaxed text-slate-600">{t}</p>
+                <p className="text-sm leading-relaxed text-steel-200/80">{t}</p>
               </div>
             ))}
           </div>
@@ -109,20 +109,20 @@ export default function Home() {
       </section>
 
       {/* How it works */}
-      <section className="border-y border-line bg-white">
+      <section className="border-t border-white/5">
         <Container className="py-16 sm:py-24">
-          <Eyebrow>How it works</Eyebrow>
-          <h2 className="mt-4 max-w-2xl text-3xl font-bold sm:text-4xl">
+          <Eyebrow tone="dark">How it works</Eyebrow>
+          <h2 className="mt-4 max-w-2xl text-3xl font-bold text-white sm:text-4xl">
             From &ldquo;what&rsquo;s my score?&rdquo; to audit-ready &mdash; and kept that way.
           </h2>
           <div className="mt-12 grid gap-8 md:grid-cols-3">
             {STEPS.map((s) => (
               <div key={s.n}>
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-navy-900 text-lg font-bold text-white">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-cleared-600 text-lg font-bold text-white">
                   {s.n}
                 </div>
-                <h3 className="mt-5 text-lg font-semibold">{s.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">{s.body}</p>
+                <h3 className="mt-5 text-lg font-semibold text-white">{s.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-steel-200/80">{s.body}</p>
               </div>
             ))}
           </div>
@@ -130,7 +130,7 @@ export default function Home() {
       </section>
 
       {/* The difference */}
-      <section className="bg-navy-900 text-steel-200">
+      <section className="border-t border-white/5 bg-navy-800">
         <Container className="py-16 sm:py-24">
           <Eyebrow tone="dark">The difference</Eyebrow>
           <h2 className="mt-4 max-w-2xl text-3xl font-bold text-white sm:text-4xl">
@@ -156,7 +156,7 @@ export default function Home() {
                 heavier, pricier, and a big commitment to unwind.
               </p>
             </div>
-            <div className="rounded-xl border-2 border-cleared-500 bg-cleared-600/10 p-6">
+            <div className="rounded-xl border-2 border-cleared-500 bg-cleared-500/10 p-6">
               <h3 className="text-base font-semibold text-white">Muster</h3>
               <p className="mt-1 text-xs uppercase tracking-wide text-cleared-500">Operated · artifact-only</p>
               <p className="mt-4 text-sm leading-relaxed text-white/90">
@@ -172,15 +172,15 @@ export default function Home() {
       </section>
 
       {/* What we do */}
-      <section className="bg-paper">
+      <section className="border-t border-white/5">
         <Container className="py-16 sm:py-24">
           <div className="grid gap-12 lg:grid-cols-[1fr_1.1fr] lg:items-center">
             <div>
-              <Eyebrow>What Muster does</Eyebrow>
-              <h2 className="mt-4 text-3xl font-bold sm:text-4xl">
+              <Eyebrow tone="dark">What Muster does</Eyebrow>
+              <h2 className="mt-4 text-3xl font-bold text-white sm:text-4xl">
                 One productized service. Every part of the obligation.
               </h2>
-              <p className="mt-5 text-slate-600">
+              <p className="mt-5 text-steel-200/80">
                 Software does the repeatable work; a credentialed practitioner
                 signs off on everything that touches your score; a founder runs
                 the relationship.
@@ -195,7 +195,7 @@ export default function Home() {
                 "Prep you for a C3PAO assessment (within scope)",
                 "Flag a slipping score before it costs you a PO",
               ].map((t) => (
-                <li key={t} className="flex items-start gap-3 rounded-lg border border-line bg-white p-4 text-sm text-slate-600">
+                <li key={t} className="flex items-start gap-3 rounded-lg border border-white/10 bg-white/5 p-4 text-sm text-steel-200/80">
                   <Check /> <span>{t}</span>
                 </li>
               ))}
@@ -205,33 +205,33 @@ export default function Home() {
       </section>
 
       {/* Pricing teaser */}
-      <section className="border-y border-line bg-white">
+      <section className="border-t border-white/5 bg-navy-800">
         <Container className="py-16 sm:py-24">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
-              <Eyebrow>Pricing</Eyebrow>
-              <h2 className="mt-4 text-3xl font-bold sm:text-4xl">Published and fixed.</h2>
-              <p className="mt-3 max-w-xl text-slate-600">
+              <Eyebrow tone="dark">Pricing</Eyebrow>
+              <h2 className="mt-4 text-3xl font-bold text-white sm:text-4xl">Published and fixed.</h2>
+              <p className="mt-3 max-w-xl text-steel-200/80">
                 About 3–5× the cost of do-it-yourself software &mdash; because we
                 operate it, you don&rsquo;t. One-time onboarding, then a monthly
                 subscription.
               </p>
             </div>
-            <CTA href="/pricing" variant="ghost">See full pricing</CTA>
+            <CTA href="/pricing" variant="outline">See full pricing</CTA>
           </div>
           <div className="mt-10 grid gap-5 md:grid-cols-3">
             {TIERS.map((t) => (
               <div
                 key={t.name}
-                className={`rounded-2xl border p-7 ${t.featured ? "border-cleared-500 bg-cleared-50" : "border-line bg-paper"}`}
+                className={`rounded-2xl border p-7 ${t.featured ? "border-cleared-500 bg-cleared-500/10" : "border-white/10 bg-white/5"}`}
               >
-                <h3 className="text-lg font-semibold">{t.name}</h3>
-                <p className="mt-1 text-sm text-slate-500">{t.who}</p>
-                <p className="mt-6 text-3xl font-bold text-navy-900">
+                <h3 className="text-lg font-semibold text-white">{t.name}</h3>
+                <p className="mt-1 text-sm text-steel-200/70">{t.who}</p>
+                <p className="mt-6 text-3xl font-bold text-white">
                   {t.mo}
-                  <span className="text-base font-medium text-slate-500">/mo</span>
+                  <span className="text-base font-medium text-steel-200/70">/mo</span>
                 </p>
-                <p className="mt-1 text-sm text-slate-500">{t.setup} one-time onboarding</p>
+                <p className="mt-1 text-sm text-steel-200/70">{t.setup} one-time onboarding</p>
               </div>
             ))}
           </div>
@@ -239,28 +239,28 @@ export default function Home() {
       </section>
 
       {/* Credibility */}
-      <section className="bg-paper">
+      <section className="border-t border-white/5">
         <Container className="py-16 sm:py-24">
-          <div className="rounded-2xl border border-line bg-white p-8 sm:p-12">
-            <Eyebrow>Built to be trusted from day one</Eyebrow>
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-8 sm:p-12">
+            <Eyebrow tone="dark">Built to be trusted from day one</Eyebrow>
             <div className="mt-6 grid gap-8 md:grid-cols-3">
               <div>
-                <h3 className="font-semibold text-navy-900">A credentialed practitioner signs off</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                <h3 className="font-semibold text-white">A credentialed practitioner signs off</h3>
+                <p className="mt-2 text-sm leading-relaxed text-steel-200/80">
                   A Registered Practitioner / CMMC-certified professional reviews
                   every SPRS-affecting deliverable before it is posted or sent.
                 </p>
               </div>
               <div>
-                <h3 className="font-semibold text-navy-900">A senior DoD advisor</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                <h3 className="font-semibold text-white">A senior DoD advisor</h3>
+                <p className="mt-2 text-sm leading-relaxed text-steel-200/80">
                   Guides our program and methodology, and stands behind the
                   quality of the work in front of your primes.
                 </p>
               </div>
               <div>
-                <h3 className="font-semibold text-navy-900">We prepare; you attest</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                <h3 className="font-semibold text-white">We prepare; you attest</h3>
+                <p className="mt-2 text-sm leading-relaxed text-steel-200/80">
                   We are not a C3PAO and never sign your government attestations.
                   You stay in control &mdash; which is exactly the point.
                 </p>
@@ -271,23 +271,27 @@ export default function Home() {
       </section>
 
       {/* Final CTA */}
-      <section className="bg-white">
+      <section className="border-t border-white/5 bg-navy-800">
         <Container className="py-20">
-          <div className="rounded-3xl bg-navy-900 px-8 py-14 text-center sm:px-16">
-            <h2 className="mx-auto max-w-2xl text-3xl font-bold text-white sm:text-4xl">
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-navy-900 px-8 py-14 text-center sm:px-16">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-cleared-500/20 blur-[100px]"
+            />
+            <h2 className="relative mx-auto max-w-2xl text-3xl font-bold text-white sm:text-4xl">
               Find out your SPRS score in about 15 minutes. Free.
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-steel-200/80">
+            <p className="relative mx-auto mt-4 max-w-xl text-steel-200/80">
               No sales call required to get your report. See exactly where you
               stand against all 110 controls &mdash; then decide if you want us
               to handle it.
             </p>
-            <div className="mt-8 flex justify-center">
+            <div className="relative mt-8 flex justify-center">
               <CTA href="/assessment/run">Get your free SPRS assessment</CTA>
             </div>
           </div>
         </Container>
       </section>
-    </>
+    </div>
   );
 }

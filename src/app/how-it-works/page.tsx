@@ -45,14 +45,14 @@ const STAGES = [
 
 export default function HowItWorks() {
   return (
-    <>
-      <section className="border-b border-line bg-white">
+    <div className="bg-navy-900 text-steel-200">
+      <section className="border-b border-white/5">
         <Container className="py-16 sm:py-20">
-          <Eyebrow>How it works</Eyebrow>
-          <h1 className="mt-4 max-w-3xl text-4xl font-bold sm:text-5xl">
+          <Eyebrow tone="dark">How it works</Eyebrow>
+          <h1 className="mt-4 max-w-3xl text-4xl font-bold text-white sm:text-5xl">
             A product sources and qualifies you. A founder closes. Then software keeps you ready.
           </h1>
-          <p className="mt-5 max-w-2xl text-lg text-slate-600">
+          <p className="mt-5 max-w-2xl text-lg text-steel-200/80">
             The free assessment does the heavy lifting up front. The five-figure,
             business-critical decision is handled by a person &mdash; not a
             checkout button.
@@ -60,23 +60,23 @@ export default function HowItWorks() {
         </Container>
       </section>
 
-      <section className="bg-paper">
+      <section className="bg-navy-800">
         <Container className="py-16 sm:py-20">
           <div className="space-y-6">
             {STAGES.map((s) => (
               <div
                 key={s.n}
-                className="grid gap-6 rounded-2xl border border-line bg-white p-7 sm:p-9 md:grid-cols-[auto_1fr]"
+                className="grid gap-6 rounded-2xl border border-white/10 bg-white/5 p-7 sm:p-9 md:grid-cols-[auto_1fr]"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-navy-900 text-xl font-bold text-white">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cleared-600 text-xl font-bold text-white">
                   {s.n}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold">{s.title}</h2>
-                  <p className="mt-2 text-slate-600">{s.lede}</p>
+                  <h2 className="text-2xl font-bold text-white">{s.title}</h2>
+                  <p className="mt-2 text-steel-200/80">{s.lede}</p>
                   <ul className="mt-5 grid gap-3 sm:grid-cols-2">
                     {s.points.map((p) => (
-                      <li key={p} className="flex items-start gap-3 text-sm text-slate-600">
+                      <li key={p} className="flex items-start gap-3 text-sm text-steel-200/80">
                         <Check /> <span>{p}</span>
                       </li>
                     ))}
@@ -88,9 +88,9 @@ export default function HowItWorks() {
         </Container>
       </section>
 
-      <section className="bg-white">
+      <section className="border-t border-white/5">
         <Container className="py-16 text-center">
-          <h2 className="mx-auto max-w-2xl text-3xl font-bold">
+          <h2 className="mx-auto max-w-2xl text-3xl font-bold text-white">
             It starts with one free report.
           </h2>
           <div className="mt-7 flex justify-center">
@@ -98,6 +98,6 @@ export default function HowItWorks() {
           </div>
         </Container>
       </section>
-    </>
+    </div>
   );
 }

@@ -52,12 +52,12 @@ const SEPARATE = [
 
 export default function Pricing() {
   return (
-    <>
-      <section className="border-b border-line bg-white">
+    <div className="bg-navy-900 text-steel-200">
+      <section className="border-b border-white/5">
         <Container className="py-16 sm:py-20">
-          <Eyebrow>Pricing</Eyebrow>
-          <h1 className="mt-4 text-4xl font-bold sm:text-5xl">Published. Fixed. No surprises.</h1>
-          <p className="mt-5 max-w-2xl text-lg text-slate-600">
+          <Eyebrow tone="dark">Pricing</Eyebrow>
+          <h1 className="mt-4 text-4xl font-bold text-white sm:text-5xl">Published. Fixed. No surprises.</h1>
+          <p className="mt-5 max-w-2xl text-lg text-steel-200/80">
             You pay about 3–5× the cost of do-it-yourself software &mdash;
             because we <em>operate</em> it for you. A one-time onboarding fee,
             then a monthly subscription that never lets your score go stale.
@@ -65,30 +65,30 @@ export default function Pricing() {
         </Container>
       </section>
 
-      <section className="bg-paper">
+      <section className="bg-navy-800">
         <Container className="py-16 sm:py-20">
           <div className="grid gap-6 md:grid-cols-3">
             {TIERS.map((t) => (
               <div
                 key={t.name}
-                className={`flex flex-col rounded-2xl border p-8 ${t.featured ? "border-cleared-500 bg-white ring-2 ring-cleared-500" : "border-line bg-white"}`}
+                className={`flex flex-col rounded-2xl border p-8 ${t.featured ? "border-cleared-500 bg-white/5 ring-2 ring-cleared-500" : "border-white/10 bg-white/5"}`}
               >
                 {t.featured && (
-                  <span className="mb-3 inline-block w-fit rounded-full bg-cleared-50 px-3 py-1 text-xs font-semibold text-cleared-700">
+                  <span className="mb-3 inline-block w-fit rounded-full bg-cleared-500/15 px-3 py-1 text-xs font-semibold text-cleared-500">
                     Most common
                   </span>
                 )}
-                <h2 className="text-xl font-bold">{t.name}</h2>
-                <p className="mt-2 min-h-[40px] text-sm text-slate-500">{t.who}</p>
-                <p className="mt-6 text-4xl font-bold text-navy-900">
+                <h2 className="text-xl font-bold text-white">{t.name}</h2>
+                <p className="mt-2 min-h-[40px] text-sm text-steel-200/70">{t.who}</p>
+                <p className="mt-6 text-4xl font-bold text-white">
                   {t.mo}
-                  <span className="text-base font-medium text-slate-500">/mo</span>
+                  <span className="text-base font-medium text-steel-200/70">/mo</span>
                 </p>
-                <p className="mt-1 text-sm text-slate-500">{t.annual}</p>
-                <div className="mt-4 rounded-lg bg-paper px-4 py-3 text-sm text-slate-600">
-                  <span className="font-semibold text-navy-900">{t.setup}</span> one-time onboarding
+                <p className="mt-1 text-sm text-steel-200/70">{t.annual}</p>
+                <div className="mt-4 rounded-lg bg-white/5 px-4 py-3 text-sm text-steel-200/80">
+                  <span className="font-semibold text-white">{t.setup}</span> one-time onboarding
                 </div>
-                <CTA href="/assessment/run" className="mt-6" variant={t.featured ? "primary" : "ghost"}>
+                <CTA href="/assessment/run" className="mt-6" variant={t.featured ? "primary" : "outline"}>
                   Start with a free assessment
                 </CTA>
               </div>
@@ -96,28 +96,28 @@ export default function Pricing() {
           </div>
 
           <div className="mt-10 grid gap-6 md:grid-cols-2">
-            <div className="rounded-2xl border border-line bg-white p-7">
-              <h3 className="text-lg font-semibold text-navy-900">What every tier includes</h3>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-7">
+              <h3 className="text-lg font-semibold text-white">What every tier includes</h3>
               <ul className="mt-4 space-y-3">
                 {INCLUDED.map((i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-slate-600">
+                  <li key={i} className="flex items-start gap-3 text-sm text-steel-200/80">
                     <Check /> <span>{i}</span>
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="rounded-2xl border border-line bg-white p-7">
-              <h3 className="text-lg font-semibold text-navy-900">Paid separately (to your own vendors)</h3>
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-7">
+              <h3 className="text-lg font-semibold text-white">Paid separately (to your own vendors)</h3>
               <ul className="mt-4 space-y-3">
                 {SEPARATE.map((i) => (
-                  <li key={i} className="flex items-start gap-3 text-sm text-slate-500">
-                    <span className="mt-1 h-1.5 w-1.5 flex-none rounded-full bg-slate-400" />
+                  <li key={i} className="flex items-start gap-3 text-sm text-steel-200/70">
+                    <span className="mt-1 h-1.5 w-1.5 flex-none rounded-full bg-steel-500" />
                     <span>{i}</span>
                   </li>
                 ))}
               </ul>
-              <p className="mt-6 rounded-lg bg-cleared-50 p-4 text-sm text-cleared-700">
-                <strong>Design partners:</strong> our first few customers get a
+              <p className="mt-6 rounded-lg bg-cleared-500/10 p-4 text-sm text-steel-200/90">
+                <strong className="text-cleared-500">Design partners:</strong> our first few customers get a
                 setup discount in exchange for feedback and a testimonial.
               </p>
             </div>
@@ -125,9 +125,9 @@ export default function Pricing() {
         </Container>
       </section>
 
-      <section className="bg-white">
+      <section className="border-t border-white/5">
         <Container className="py-16 text-center">
-          <h2 className="mx-auto max-w-2xl text-3xl font-bold">
+          <h2 className="mx-auto max-w-2xl text-3xl font-bold text-white">
             Not sure which tier fits? The free assessment tells you.
           </h2>
           <div className="mt-7 flex justify-center">
@@ -135,6 +135,6 @@ export default function Pricing() {
           </div>
         </Container>
       </section>
-    </>
+    </div>
   );
 }

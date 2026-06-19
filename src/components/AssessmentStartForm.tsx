@@ -35,12 +35,12 @@ export default function AssessmentStartForm() {
 
   if (status === "done") {
     return (
-      <div className="rounded-2xl border border-cleared-500 bg-cleared-50 p-8 text-center">
+      <div className="rounded-2xl border border-cleared-500 bg-cleared-500/10 p-8 text-center">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-cleared-600 text-white">
           <Check className="h-6 w-6 text-white" />
         </div>
-        <h3 className="mt-4 text-xl font-bold text-navy-900">You&rsquo;re in.</h3>
-        <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
+        <h3 className="mt-4 text-xl font-bold text-white">You&rsquo;re in.</h3>
+        <p className="mx-auto mt-2 max-w-md text-sm text-steel-200/80">
           Let&rsquo;s get your estimated SPRS score now &mdash; the guided
           questionnaire takes about 15 minutes and you&rsquo;ll see your score the
           moment you finish. We never ask for your CUI.
@@ -56,13 +56,13 @@ export default function AssessmentStartForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="rounded-2xl border border-line bg-white p-7 sm:p-8">
+    <form onSubmit={onSubmit} className="rounded-2xl border border-white/10 bg-white/5 p-7 sm:p-8">
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Full name" name="name" required />
         <Field label="Work email" name="email" type="email" required />
         <Field label="Company" name="company" required />
         <div>
-          <label className="text-sm font-medium text-navy-900">Employees</label>
+          <label className="text-sm font-medium text-steel-200">Employees</label>
           <select name="employees" className={selectCls} defaultValue="">
             <option value="" disabled>Select…</option>
             {EMPLOYEES.map((e) => <option key={e}>{e}</option>)}
@@ -70,7 +70,7 @@ export default function AssessmentStartForm() {
         </div>
         <Field label="Primary prime(s)" name="primes" placeholder="e.g. Lockheed, RTX (optional)" className="sm:col-span-2" optional />
         <div className="sm:col-span-2">
-          <label className="text-sm font-medium text-navy-900">Your SPRS score today</label>
+          <label className="text-sm font-medium text-steel-200">Your SPRS score today</label>
           <select name="sprs_status" className={selectCls} defaultValue="">
             <option value="" disabled>Select…</option>
             {SPRS_STATUS.map((s) => <option key={s}>{s}</option>)}
@@ -87,11 +87,11 @@ export default function AssessmentStartForm() {
       <button
         type="submit"
         disabled={status === "submitting"}
-        className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-cleared-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-cleared-700 disabled:opacity-60"
+        className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-cleared-600 px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-cleared-700/20 transition-colors hover:bg-cleared-700 disabled:opacity-60"
       >
         {status === "submitting" ? "Starting…" : "Start my free assessment"}
       </button>
-      <p className="mt-3 text-center text-xs text-slate-500">
+      <p className="mt-3 text-center text-xs text-steel-200/60">
         No spam, no obligation. We never ask you to upload CUI.
       </p>
     </form>
@@ -99,7 +99,7 @@ export default function AssessmentStartForm() {
 }
 
 const selectCls =
-  "mt-1.5 w-full rounded-lg border border-line bg-paper px-3 py-2.5 text-sm text-navy-900 outline-none focus:border-steel-500";
+  "mt-1.5 w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-white outline-none focus:border-cleared-500";
 
 function Field({
   label,
@@ -120,16 +120,16 @@ function Field({
 }) {
   return (
     <div className={className}>
-      <label className="text-sm font-medium text-navy-900">
+      <label className="text-sm font-medium text-steel-200">
         {label}{" "}
-        {optional && <span className="font-normal text-slate-400">(optional)</span>}
+        {optional && <span className="font-normal text-steel-200/50">(optional)</span>}
       </label>
       <input
         name={name}
         type={type}
         required={required}
         placeholder={placeholder}
-        className="mt-1.5 w-full rounded-lg border border-line bg-paper px-3 py-2.5 text-sm text-navy-900 outline-none focus:border-steel-500"
+        className="mt-1.5 w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 text-sm text-white placeholder:text-steel-500 outline-none focus:border-cleared-500"
       />
     </div>
   );

@@ -16,14 +16,14 @@ const TIMELINE = [
 
 export default function WhyNow() {
   return (
-    <>
-      <section className="border-b border-line bg-white">
+    <div className="bg-navy-900 text-steel-200">
+      <section className="border-b border-white/5">
         <Container className="py-16 sm:py-20">
-          <Eyebrow>Why now</Eyebrow>
-          <h1 className="mt-4 max-w-3xl text-4xl font-bold sm:text-5xl">
+          <Eyebrow tone="dark">Why now</Eyebrow>
+          <h1 className="mt-4 max-w-3xl text-4xl font-bold text-white sm:text-5xl">
             This isn&rsquo;t a 2026 problem. It&rsquo;s a today problem &mdash; that never ends.
           </h1>
-          <p className="mt-5 max-w-2xl text-lg text-slate-600">
+          <p className="mt-5 max-w-2xl text-lg text-steel-200/80">
             The headlines are about the CMMC deadline. The reality is that the
             underlying SPRS obligation already binds you, and once you&rsquo;re
             compliant it has to be maintained every quarter. Both facts point to
@@ -32,27 +32,27 @@ export default function WhyNow() {
         </Container>
       </section>
 
-      <section className="bg-paper">
+      <section className="bg-navy-800">
         <Container className="py-16 sm:py-20">
-          <ol className="relative space-y-8 border-l-2 border-line pl-8">
+          <ol className="relative space-y-8 border-l-2 border-white/15 pl-8">
             {TIMELINE.map((t) => (
               <li key={t.date} className="relative">
-                <span className="absolute -left-[39px] mt-1 h-4 w-4 rounded-full border-2 border-white bg-cleared-600" />
-                <span className="text-xs font-semibold uppercase tracking-wide text-steel-700">{t.date}</span>
-                <h2 className="mt-1 text-xl font-bold text-navy-900">{t.title}</h2>
-                <p className="mt-2 max-w-2xl text-slate-600">{t.body}</p>
+                <span className="absolute -left-[39px] mt-1 h-4 w-4 rounded-full border-2 border-navy-800 bg-cleared-500" />
+                <span className="font-mono text-xs font-medium uppercase tracking-[0.14em] text-steel-200/70">{t.date}</span>
+                <h2 className="mt-1 text-xl font-bold text-white">{t.title}</h2>
+                <p className="mt-2 max-w-2xl text-steel-200/80">{t.body}</p>
               </li>
             ))}
           </ol>
         </Container>
       </section>
 
-      <section className="bg-white">
+      <section className="border-t border-white/5">
         <Container className="py-16 text-center">
-          <h2 className="mx-auto max-w-2xl text-3xl font-bold">
+          <h2 className="mx-auto max-w-2xl text-3xl font-bold text-white">
             The supply chain is years behind. Get ahead of it.
           </h2>
-          <p className="mx-auto mt-3 max-w-xl text-slate-600">
+          <p className="mx-auto mt-3 max-w-xl text-steel-200/80">
             Assessor capacity is scarce and backlogs are forming. The subs who
             start now are the ones who keep winning work.
           </p>
@@ -61,6 +61,6 @@ export default function WhyNow() {
           </div>
         </Container>
       </section>
-    </>
+    </div>
   );
 }
