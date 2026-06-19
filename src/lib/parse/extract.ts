@@ -6,6 +6,7 @@
  */
 import { extractText, getDocumentProxy } from "unpdf";
 import mammoth from "mammoth";
+import { get } from "@vercel/blob";
 
 export type ExtractResult = { text: string; error?: string };
 
@@ -41,14 +42,18 @@ export async function extractTextFromBuffer(
   }
 }
 
-/** Fetch a stored blob by URL and extract its text. */
+/** Fetch a stored (private) blob by URL and extract its text. */
 export async function extractTextFromUrl(
   url: string,
   filename: string,
   contentType?: string,
 ): Promise<ExtractResult> {
-  const res = await fetch(url);
-  if (!res.ok) return { text: "", error: `Could not fetch file (HTTP ${res.status}).` };
-  const data = await res.arrayBuffer();
+  // Blobs are uploaded with private access, so read them back through the SDK
+  // (which authenticates with BLOB_READ_WRITE_TOKEN) rather than a bare fetch.
+  const result = await get(url, { access: "private" });
+  if (!result || !result.stream) {
+    return { text: "", error: "Could not fetch file from storage." };
+  }
+  const data = await new Response(result.stream).arrayBuffer();
   return extractTextFromBuffer(filename, contentType, data);
 }

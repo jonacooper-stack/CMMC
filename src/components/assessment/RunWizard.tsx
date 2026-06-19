@@ -33,7 +33,7 @@ export default function RunWizard() {
     try {
       for (const file of files) {
         const blob = await upload(file.name, file, {
-          access: "public",
+          access: "private",
           handleUploadUrl: "/api/uploads",
           contentType: file.type || undefined,
           abortSignal: uploadController.signal,
