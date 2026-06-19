@@ -18,6 +18,7 @@ export default function RunWizard() {
   const [error, setError] = useState("");
   const [result, setResult] = useState<DualScoreResult | null>(null);
   const [findings, setFindings] = useState<Finding[]>([]);
+  const [aiAnalyzed, setAiAnalyzed] = useState(true);
 
   async function run() {
     if (!files.length || !attested) return;
@@ -76,6 +77,7 @@ export default function RunWizard() {
       }
       setResult(data.result as DualScoreResult);
       setFindings((data.findings as Finding[]) ?? []);
+      setAiAnalyzed(data.aiAnalyzed !== false);
       setStep("results");
       if (typeof window !== "undefined") window.scrollTo({ top: 0 });
     } catch (e) {
@@ -92,7 +94,7 @@ export default function RunWizard() {
   }
 
   if (step === "results" && result) {
-    return <DualResults result={result} findings={findings} />;
+    return <DualResults result={result} findings={findings} aiAnalyzed={aiAnalyzed} />;
   }
 
   if (step === "processing") {

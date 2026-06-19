@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { CONTROLS } from "@/lib/sprs/controls";
 import { FAMILY_BY_ID } from "@/lib/sprs/families";
 import { scoreVerdict } from "@/lib/sprs/scoring";
+import { computeCoverage, type FamilyCoverage } from "@/lib/sprs/coverage";
+import { POLICY_BY_FAMILY } from "@/lib/policies/library";
 import type { DualScoreResult, Finding } from "@/lib/sprs/types";
 
 const TITLE = new Map(CONTROLS.map((c) => [c.id, c.title]));
@@ -22,14 +25,83 @@ function ScoreTile({ label, score, hint }: { label: string; score: number; hint:
   );
 }
 
+const COVERAGE_META: Record<FamilyCoverage["status"], { label: string; dot: string; text: string }> = {
+  covered: { label: "Covered", dot: "bg-cleared-600", text: "text-cleared-700" },
+  partial: { label: "Partial", dot: "bg-amber-500", text: "text-amber-600" },
+  missing: { label: "Missing", dot: "bg-slate-300", text: "text-slate-500" },
+};
+
+/** One policy area: status badge + (for gaps) what it should cover and a copyable starter. */
+function PolicyCard({ fam }: { fam: FamilyCoverage }) {
+  const policy = POLICY_BY_FAMILY[fam.id];
+  const meta = COVERAGE_META[fam.status];
+  const [copied, setCopied] = useState(false);
+  if (!policy) return null;
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(policy.starter);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard blocked — ignore */
+    }
+  }
+
+  return (
+    <li className="rounded-xl border border-line bg-white p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <span className={`h-2.5 w-2.5 flex-none rounded-full ${meta.dot}`} aria-hidden />
+          <p className="truncate text-sm font-medium text-navy-900">{policy.name}</p>
+        </div>
+        <span className={`flex-none text-xs font-semibold ${meta.text}`}>{meta.label}</span>
+      </div>
+      {fam.status !== "covered" && (
+        <details className="mt-2">
+          <summary className="cursor-pointer text-xs font-medium text-cleared-700 hover:underline">
+            What this policy should cover
+          </summary>
+          <p className="mt-2 text-sm text-slate-600">{policy.purpose}</p>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">
+            {policy.keyElements.map((el) => (
+              <li key={el}>{el}</li>
+            ))}
+          </ul>
+          <div className="mt-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wide text-steel-700">
+                Starter template
+              </span>
+              <button
+                type="button"
+                onClick={copy}
+                className="rounded-md border border-line bg-paper px-2.5 py-1 text-xs font-semibold text-navy-900 hover:border-steel-500"
+              >
+                {copied ? "Copied!" : "Copy"}
+              </button>
+            </div>
+            <pre className="mt-1.5 max-h-56 overflow-auto whitespace-pre-wrap rounded-lg border border-line bg-paper p-3 text-xs leading-relaxed text-slate-700">
+              {policy.starter}
+            </pre>
+          </div>
+        </details>
+      )}
+    </li>
+  );
+}
+
 export default function DualResults({
   result,
   findings = [],
+  aiAnalyzed = true,
 }: {
   result: DualScoreResult;
   findings?: Finding[];
+  aiAnalyzed?: boolean;
 }) {
   const verdict = scoreVerdict(result.defensible.score);
+  const coverage = computeCoverage(findings);
   const gaps = findings
     .filter((f) => f.status !== "met_evidence")
     .sort((a, b) => {
@@ -41,6 +113,39 @@ export default function DualResults({
 
   return (
     <div className="mx-auto max-w-3xl">
+      {aiAnalyzed && !coverage.looksLikePolicy && (
+        <div className="mb-6 rounded-xl border border-amber-500 bg-amber-50 p-5">
+          <p className="text-sm font-semibold text-navy-900">
+            Are you sure these are policy documents?
+          </p>
+          <p className="mt-1.5 text-sm text-slate-600">
+            We found almost no security-policy content to assess, so the score below isn&rsquo;t
+            meaningful. Double-check you uploaded your written security policies (SSP, access
+            control, incident response, etc.) &mdash; not a résumé, a contract, or another kind of
+            document.
+          </p>
+          <Link
+            href="/assessment/run"
+            className="mt-3 inline-flex items-center justify-center rounded-lg bg-navy-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-navy-800"
+          >
+            Upload different files
+          </Link>
+        </div>
+      )}
+
+      {!aiAnalyzed && (
+        <div className="mb-6 rounded-xl border border-steel-500 bg-paper p-5">
+          <p className="text-sm font-semibold text-navy-900">
+            Demo mode &mdash; AI review isn&rsquo;t switched on yet
+          </p>
+          <p className="mt-1.5 text-sm text-slate-600">
+            This score is a placeholder (every control defaulted to &ldquo;not met&rdquo;) because no
+            AI key is configured on the server. Set <code className="font-mono text-xs">ANTHROPIC_API_KEY</code>{" "}
+            in your Vercel project&rsquo;s environment variables to get a real policy review.
+          </p>
+        </div>
+      )}
+
       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-steel-700">
         Your estimated SPRS score
       </p>
@@ -117,6 +222,21 @@ export default function DualResults({
                   </p>
                 )}
               </li>
+            ))}
+          </ul>
+        </>
+      )}
+
+      {aiAnalyzed && coverage.looksLikePolicy && (
+        <>
+          <h2 className="mt-12 text-2xl font-bold">Your policy coverage</h2>
+          <p className="mt-1 text-sm text-slate-500">
+            The 14 standard NIST 800-171 policy areas. Open any gap to see what it should include and
+            copy a starter you can fill in.
+          </p>
+          <ul className="mt-5 grid gap-2.5">
+            {coverage.families.map((fam) => (
+              <PolicyCard key={fam.id} fam={fam} />
             ))}
           </ul>
         </>

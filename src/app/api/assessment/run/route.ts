@@ -17,6 +17,7 @@ import {
 } from "@/lib/db/queries";
 import { extractTextFromUrl } from "@/lib/parse/extract";
 import { analyzePolicies, findingsToStatusMap, type PolicyDocument } from "@/lib/ai/analyze";
+import { hasAnthropicKey } from "@/lib/ai/client";
 import { computeDualScore } from "@/lib/sprs/scoring";
 import { CONTROLS } from "@/lib/sprs/controls";
 
@@ -99,7 +100,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     await saveSnapshot(assessment.id, result);
     await setStatus(assessment.id, "complete");
 
-    return NextResponse.json({ assessmentId: assessment.id, result, findings });
+    return NextResponse.json({ assessmentId: assessment.id, result, findings, aiAnalyzed: hasAnthropicKey() });
   } catch (e) {
     console.error("[assessment/run] analysis failed:", e);
     await setStatus(assessment.id, "failed").catch(() => {});
