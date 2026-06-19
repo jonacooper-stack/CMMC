@@ -5,22 +5,132 @@ import Link from "next/link";
 import { CONTROLS } from "@/lib/sprs/controls";
 import { FAMILY_BY_ID } from "@/lib/sprs/families";
 import { scoreVerdict } from "@/lib/sprs/scoring";
-import { computeCoverage, type FamilyCoverage } from "@/lib/sprs/coverage";
+import { computeCoverage, gapControls, type FamilyCoverage } from "@/lib/sprs/coverage";
 import { POLICY_BY_FAMILY } from "@/lib/policies/library";
-import type { DualScoreResult, Finding } from "@/lib/sprs/types";
+import type { DualScoreResult, Finding, FindingStatus } from "@/lib/sprs/types";
 
 const TITLE = new Map(CONTROLS.map((c) => [c.id, c.title]));
+const CONTROL_BY_ID = new Map(CONTROLS.map((c) => [c.id, c] as const));
 
-function ScoreTile({ label, score, hint }: { label: string; score: number; hint: string }) {
-  const good = score >= 88;
+const GAUGE_MIN = -203;
+const GAUGE_MAX = 110;
+const gaugePct = (s: number) =>
+  ((Math.max(GAUGE_MIN, Math.min(GAUGE_MAX, s)) - GAUGE_MIN) / (GAUGE_MAX - GAUGE_MIN)) * 100;
+const labelPct = (p: number) => Math.max(7, Math.min(93, p)); // keep edge labels in-bounds
+
+/**
+ * A bad → good thermometer for the punishing −203…110 SPRS scale. Both scores
+ * are marked on it and the evidence gap is shaded between them, so a raw number
+ * turns into "where am I, and how far to the goal".
+ */
+function ScoreGauge({ defensible, selfAssessed }: { defensible: number; selfAssessed: number }) {
+  const dPos = gaugePct(defensible);
+  const sPos = gaugePct(selfAssessed);
+  const zeroPos = gaugePct(0);
+  const passPos = gaugePct(88);
+  const progress = Math.round((Math.max(0, Math.min(110, defensible)) / 110) * 100);
+  const to110 = Math.max(0, 110 - defensible);
+  const to88 = Math.max(0, 88 - defensible);
+  const hasGap = selfAssessed > defensible;
+
   return (
-    <div className="rounded-2xl border border-line bg-white p-6">
-      <div className="text-xs font-semibold uppercase tracking-[0.12em] text-steel-700">{label}</div>
-      <div className="mt-2 flex items-end gap-2">
-        <span className={`text-5xl font-bold ${good ? "text-cleared-600" : "text-amber-500"}`}>{score}</span>
-        <span className="pb-1.5 text-sm text-slate-500">/ 110</span>
+    <div className="mt-6 rounded-2xl border border-line bg-white p-6">
+      {/* value pill above the audit-ready marker */}
+      <div className="relative mb-1.5 h-6">
+        <div
+          className="absolute -translate-x-1/2 rounded-md bg-navy-900 px-2 py-0.5 text-sm font-bold text-white"
+          style={{ left: `${labelPct(dPos)}%` }}
+        >
+          {defensible}
+        </div>
       </div>
-      <p className="mt-2 text-xs leading-relaxed text-slate-500">{hint}</p>
+
+      {/* zoned track */}
+      <div className="relative h-4 w-full overflow-hidden rounded-full">
+        <div className="absolute inset-y-0 left-0 bg-rose-400" style={{ width: `${zeroPos}%` }} />
+        <div
+          className="absolute inset-y-0 bg-amber-400"
+          style={{ left: `${zeroPos}%`, width: `${passPos - zeroPos}%` }}
+        />
+        <div className="absolute inset-y-0 right-0 bg-cleared-500" style={{ left: `${passPos}%` }} />
+        {hasGap && (
+          <div
+            className="absolute inset-y-0 bg-navy-900/15"
+            style={{ left: `${dPos}%`, width: `${sPos - dPos}%` }}
+          />
+        )}
+        <div
+          className="absolute inset-y-0 w-1 -translate-x-1/2 bg-navy-900"
+          style={{ left: `${dPos}%` }}
+        />
+        {hasGap && (
+          <div
+            className="absolute inset-y-0 w-0.5 -translate-x-1/2 bg-navy-900/50"
+            style={{ left: `${sPos}%` }}
+          />
+        )}
+      </div>
+
+      {/* numeric ticks */}
+      <div className="relative mt-1.5 h-4 text-[10px] text-slate-400">
+        <span className="absolute left-0">−203</span>
+        <span className="absolute -translate-x-1/2" style={{ left: `${zeroPos}%` }}>
+          0
+        </span>
+        <span
+          className="absolute -translate-x-1/2 font-semibold text-cleared-700"
+          style={{ left: `${labelPct(passPos)}%` }}
+        >
+          88
+        </span>
+        <span className="absolute right-0">110</span>
+      </div>
+
+      {/* zone names */}
+      <div className="relative mt-1 h-4 text-[11px] font-medium text-slate-400">
+        <span className="absolute -translate-x-1/2" style={{ left: `${zeroPos / 2}%` }}>
+          Early stage
+        </span>
+        <span className="absolute -translate-x-1/2" style={{ left: `${(zeroPos + passPos) / 2}%` }}>
+          Material gaps
+        </span>
+        <span
+          className="absolute -translate-x-1/2 text-cleared-700"
+          style={{ left: `${labelPct((passPos + 100) / 2)}%` }}
+        >
+          Strong
+        </span>
+      </div>
+
+      <div className="mt-4 border-t border-line pt-4">
+        <p className="text-sm text-slate-600">
+          You&rsquo;re about <strong className="text-navy-900">{progress}%</strong> of the way to a
+          perfect 110
+          {to110 > 0 ? (
+            <>
+              {" "}
+              &mdash; <strong className="text-navy-900">{to110}</strong> points to go
+              {to88 > 0 ? <>, {to88} to a conditional pass (88)</> : null}.
+            </>
+          ) : (
+            <>.</>
+          )}
+        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 text-xs text-slate-500">
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block h-3 w-1 rounded-sm bg-navy-900" aria-hidden /> Audit-ready{" "}
+            <strong className="text-navy-900">{defensible}</strong> &mdash; only what you can prove
+            today
+          </span>
+          {hasGap && (
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block h-3 w-0.5 rounded-sm bg-navy-900/50" aria-hidden />{" "}
+              Self-assessed <strong className="text-navy-900">{selfAssessed}</strong> &mdash; what
+              your policies claim
+            </span>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -31,8 +141,18 @@ const COVERAGE_META: Record<FamilyCoverage["status"], { label: string; dot: stri
   missing: { label: "Missing", dot: "bg-slate-300", text: "text-slate-500" },
 };
 
-/** One policy area: status badge + (for gaps) what it should cover and a copyable starter. */
-function PolicyCard({ fam }: { fam: FamilyCoverage }) {
+type GapStatus = Exclude<FindingStatus, "met_evidence">;
+type PolicyGap = { id: string; title: string; status: GapStatus };
+
+const GAP_STATUS: Record<GapStatus, { label: string; cls: string }> = {
+  not_met: { label: "Missing", cls: "bg-rose-100 text-rose-700" },
+  partial: { label: "Partial", cls: "bg-amber-100 text-amber-700" },
+  met_no_evidence: { label: "Undocumented", cls: "bg-slate-100 text-slate-600" },
+};
+
+/** One policy area: status badge, the specific control gaps in it, and (for
+ *  partial/missing) what it should cover plus a copyable starter. */
+function PolicyCard({ fam, gaps }: { fam: FamilyCoverage; gaps: PolicyGap[] }) {
   const policy = POLICY_BY_FAMILY[fam.id];
   const meta = COVERAGE_META[fam.status];
   const [copied, setCopied] = useState(false);
@@ -48,6 +168,8 @@ function PolicyCard({ fam }: { fam: FamilyCoverage }) {
     }
   }
 
+  const expandable = gaps.length > 0 || fam.status !== "covered";
+
   return (
     <li className="rounded-xl border border-line bg-white p-4">
       <div className="flex items-center justify-between gap-3">
@@ -57,34 +179,59 @@ function PolicyCard({ fam }: { fam: FamilyCoverage }) {
         </div>
         <span className={`flex-none text-xs font-semibold ${meta.text}`}>{meta.label}</span>
       </div>
-      {fam.status !== "covered" && (
+
+      {expandable && (
         <details className="mt-2">
           <summary className="cursor-pointer text-xs font-medium text-cleared-700 hover:underline">
-            What this policy should cover
+            {gaps.length > 0
+              ? `${gaps.length} gap${gaps.length === 1 ? "" : "s"} to close in this policy`
+              : "What this policy should cover"}
           </summary>
-          <p className="mt-2 text-sm text-slate-600">{policy.purpose}</p>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">
-            {policy.keyElements.map((el) => (
-              <li key={el}>{el}</li>
-            ))}
-          </ul>
-          <div className="mt-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wide text-steel-700">
-                Starter template
-              </span>
-              <button
-                type="button"
-                onClick={copy}
-                className="rounded-md border border-line bg-paper px-2.5 py-1 text-xs font-semibold text-navy-900 hover:border-steel-500"
-              >
-                {copied ? "Copied!" : "Copy"}
-              </button>
-            </div>
-            <pre className="mt-1.5 max-h-56 overflow-auto whitespace-pre-wrap rounded-lg border border-line bg-paper p-3 text-xs leading-relaxed text-slate-700">
-              {policy.starter}
-            </pre>
-          </div>
+
+          {gaps.length > 0 && (
+            <ul className="mt-2.5 space-y-1.5">
+              {gaps.map((g) => (
+                <li key={g.id} className="flex items-start gap-2 text-sm text-slate-600">
+                  <span
+                    className={`mt-0.5 flex-none rounded px-1.5 py-0.5 text-[10px] font-semibold ${GAP_STATUS[g.status].cls}`}
+                  >
+                    {GAP_STATUS[g.status].label}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="font-mono text-xs text-steel-700">{g.id}</span> {g.title}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {fam.status !== "covered" && (
+            <>
+              <p className="mt-3 text-sm text-slate-600">{policy.purpose}</p>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">
+                {policy.keyElements.map((el) => (
+                  <li key={el}>{el}</li>
+                ))}
+              </ul>
+              <div className="mt-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold uppercase tracking-wide text-steel-700">
+                    Starter template
+                  </span>
+                  <button
+                    type="button"
+                    onClick={copy}
+                    className="rounded-md border border-line bg-paper px-2.5 py-1 text-xs font-semibold text-navy-900 hover:border-steel-500"
+                  >
+                    {copied ? "Copied!" : "Copy"}
+                  </button>
+                </div>
+                <pre className="mt-1.5 max-h-56 overflow-auto whitespace-pre-wrap rounded-lg border border-line bg-paper p-3 text-xs leading-relaxed text-slate-700">
+                  {policy.starter}
+                </pre>
+              </div>
+            </>
+          )}
         </details>
       )}
     </li>
@@ -106,15 +253,30 @@ export default function DualResults({
 }) {
   const verdict = scoreVerdict(result.defensible.score);
   const coverage = computeCoverage(findings);
-  const hasGaps = findings.some((f) => f.status === "not_met" || f.needsClarification);
   const gaps = findings
     .filter((f) => f.status !== "met_evidence")
-    .sort((a, b) => {
-      const wa = CONTROLS.find((c) => c.id === a.controlId)?.weight ?? 0;
-      const wb = CONTROLS.find((c) => c.id === b.controlId)?.weight ?? 0;
-      return wb - wa;
-    })
+    .sort(
+      (a, b) =>
+        (CONTROL_BY_ID.get(b.controlId)?.weight ?? 0) -
+        (CONTROL_BY_ID.get(a.controlId)?.weight ?? 0),
+    )
     .slice(0, 10);
+
+  const gapCount = gapControls(findings).length;
+  const familyGaps = new Map<string, PolicyGap[]>();
+  for (const f of findings) {
+    if (f.status === "met_evidence") continue;
+    const ctrl = CONTROL_BY_ID.get(f.controlId);
+    if (!ctrl) continue;
+    const list = familyGaps.get(ctrl.family) ?? [];
+    list.push({ id: f.controlId, title: TITLE.get(f.controlId) ?? f.controlId, status: f.status });
+    familyGaps.set(ctrl.family, list);
+  }
+  for (const list of familyGaps.values()) {
+    list.sort(
+      (a, b) => (CONTROL_BY_ID.get(b.id)?.weight ?? 0) - (CONTROL_BY_ID.get(a.id)?.weight ?? 0),
+    );
+  }
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -158,18 +320,7 @@ export default function DualResults({
       <h1 className="mt-3 text-3xl font-bold sm:text-4xl">{verdict.label}</h1>
       <p className="mt-2 text-slate-600">{verdict.summary}</p>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <ScoreTile
-          label="Self-assessed"
-          score={result.selfAssessed.score}
-          hint="What your policies say you do — counting everything you told us is in place."
-        />
-        <ScoreTile
-          label="Audit-ready (defensible)"
-          score={result.defensible.score}
-          hint="What would actually survive an assessment — counting only controls with a documented evidence trail."
-        />
-      </div>
+      <ScoreGauge defensible={result.defensible.score} selfAssessed={result.selfAssessed.score} />
 
       {result.evidenceGap > 0 && (
         <div className="mt-4 rounded-xl border border-amber-500 bg-amber-50 p-5">
@@ -181,6 +332,28 @@ export default function DualResults({
             it &mdash; turning what you do into documented, audit-ready proof &mdash; is exactly what
             Muster builds and holds for you.
           </p>
+        </div>
+      )}
+
+      {onStartInterview && gapCount > 0 && (
+        <div className="mt-6 rounded-2xl border-2 border-navy-900/15 bg-paper p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-navy-900">Raise your score in a few minutes</h2>
+              <p className="mt-1 max-w-xl text-sm text-slate-600">
+                Some controls weren&rsquo;t covered by your documents &mdash; but you may already do
+                them in practice. Answer {gapCount} quick question{gapCount === 1 ? "" : "s"} and
+                we&rsquo;ll fold your answers into an updated score.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onStartInterview}
+              className="inline-flex flex-none items-center justify-center gap-2 rounded-lg bg-navy-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-800"
+            >
+              Answer questions <span aria-hidden>&rarr;</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -242,28 +415,10 @@ export default function DualResults({
           </p>
           <ul className="mt-5 grid gap-2.5">
             {coverage.families.map((fam) => (
-              <PolicyCard key={fam.id} fam={fam} />
+              <PolicyCard key={fam.id} fam={fam} gaps={familyGaps.get(fam.id) ?? []} />
             ))}
           </ul>
         </>
-      )}
-
-      {onStartInterview && hasGaps && (
-        <div className="mt-12 rounded-2xl border border-steel-500 bg-white p-7 sm:p-8">
-          <h2 className="text-2xl font-bold text-navy-900">Raise your score in a few minutes</h2>
-          <p className="mt-2 max-w-xl text-sm text-slate-600">
-            Some controls weren&rsquo;t covered by your documents &mdash; but you may already do them
-            in practice. Answer a short set of targeted questions and we&rsquo;ll fold your answers
-            into an updated score.
-          </p>
-          <button
-            type="button"
-            onClick={onStartInterview}
-            className="mt-5 inline-flex items-center justify-center rounded-lg bg-navy-900 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-navy-800"
-          >
-            Answer gap questions
-          </button>
-        </div>
       )}
 
       <div className="mt-12 rounded-2xl border border-cleared-500 bg-cleared-50 p-7 sm:p-8">
