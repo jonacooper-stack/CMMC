@@ -46,7 +46,13 @@ export default function RootLayout({
   // Wrap in Clerk only when configured, so the marketing site builds and runs
   // even before the auth env vars exist (and never breaks if they're absent).
   return clerkEnabled ? (
-    <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up" afterSignOutUrl="/">
+    <ClerkProvider
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+      signInFallbackRedirectUrl="/dashboard"
+      signUpFallbackRedirectUrl="/dashboard"
+      afterSignOutUrl="/"
+    >
       {tree}
     </ClerkProvider>
   ) : (
