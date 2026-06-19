@@ -1,37 +1,68 @@
 @import "tailwindcss";
 
+/**
+ * Muster design tokens — "defense-grade command console."
+ * Deep ink base (SpaceX/Exebenus), clean light surfaces (Drata), a sharp
+ * "cleared" signal-green accent, and an engineered type system.
+ * Token NAMES are stable so components inherit the new look automatically.
+ */
 @theme {
-  --color-navy-900: #0a2540;
-  --color-navy-800: #0e2e4e;
-  --color-navy-700: #143a61;
-  --color-steel-700: #33507a;
-  --color-steel-500: #5b7ba8;
-  --color-steel-200: #c7d4e6;
-  --color-cleared-700: #0f6e49;
-  --color-cleared-600: #15875a;
-  --color-cleared-500: #1b9e69;
-  --color-cleared-50: #e8f5ee;
-  --color-amber-500: #e8a317;
-  --color-amber-50: #fdf4e0;
-  --color-ink: #0a2540;
-  --color-slate-700: #334155;
-  --color-slate-600: #475569;
-  --color-slate-500: #64748b;
-  --color-slate-400: #94a3b8;
-  --color-paper: #f7f9fc;
-  --color-line: #e3e8f0;
+  /* Command inks — near-black blue, for hero / header / footer / dark moments. */
+  --color-navy-900: #0a1018;
+  --color-navy-800: #0f1722;
+  --color-navy-700: #18222f;
+  --color-ink: #0a1018;
 
-  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), monospace;
+  /* Cool technical blue-grays — labels, muted text on dark, hairlines. */
+  --color-steel-700: #3a4a63;
+  --color-steel-500: #64789a;
+  --color-steel-200: #c3d0e2;
+
+  /* "Cleared" — the signal-green accent (passed muster / met / go). */
+  --color-cleared-700: #0c7a52;
+  --color-cleared-600: #119a67;
+  --color-cleared-500: #1cc084;
+  --color-cleared-50: #e8f8f0;
+
+  /* Caution / partial. */
+  --color-amber-500: #e6a012;
+  --color-amber-50: #fcf3de;
+
+  /* Neutral text scale. */
+  --color-slate-700: #2f3b4c;
+  --color-slate-600: #45566b;
+  --color-slate-500: #64768d;
+  --color-slate-400: #93a3b8;
+
+  /* Surfaces. */
+  --color-paper: #f5f8fc;
+  --color-line: #e1e8f1;
+
+  /* Type. */
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-display), var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", monospace;
 }
 
 body {
   background: var(--color-paper);
   color: var(--color-slate-700);
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   color: var(--color-ink);
+  font-family: var(--font-display);
+  font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+/* Selection picks up the brand accent. */
+::selection {
+  background: var(--color-cleared-500);
+  color: #fff;
 }

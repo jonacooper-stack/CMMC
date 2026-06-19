@@ -28,28 +28,42 @@ export default function Home() {
   return (
     <>
       {/* Hero */}
-      <section className="border-b border-line bg-white">
-        <Container className="py-20 sm:py-28">
+      <section className="relative overflow-hidden bg-navy-900 text-steel-200">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-[0.06]"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)",
+            backgroundSize: "60px 60px",
+          }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-40 -top-48 h-[600px] w-[600px] rounded-full bg-cleared-500/20 blur-[130px]"
+        />
+        <Container className="relative py-24 sm:py-32">
           <div className="max-w-3xl">
-            <Eyebrow>Managed NIST 800-171 &amp; SPRS compliance</Eyebrow>
-            <h1 className="mt-4 text-4xl font-bold leading-[1.08] sm:text-6xl">
-              Keep your SPRS score correct. Keep winning work.
+            <Eyebrow tone="dark">Managed NIST 800-171 &amp; SPRS compliance</Eyebrow>
+            <h1 className="mt-5 text-4xl font-bold leading-[1.04] tracking-tight text-white sm:text-6xl">
+              Keep your SPRS score correct.{" "}
+              <span className="text-cleared-500">Keep winning work.</span>
             </h1>
-            <p className="mt-6 text-lg leading-relaxed text-slate-600 sm:text-xl">
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-steel-200/85 sm:text-xl">
               Muster runs your defense-compliance program for you &mdash; your
               SPRS score, your evidence, your prime questionnaires &mdash; every
               quarter, for one fixed price.{" "}
-              <span className="font-semibold text-navy-900">
+              <span className="font-semibold text-white">
                 We hold the proof. You keep your CUI.
               </span>
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="mt-9 flex flex-wrap gap-3">
               <CTA href="/assessment/run">Get your free SPRS assessment</CTA>
-              <CTA href="/how-it-works" variant="ghost">
+              <CTA href="/how-it-works" variant="outline">
                 See how it works
               </CTA>
             </div>
-            <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-500">
+            <ul className="mt-9 flex flex-wrap gap-x-6 gap-y-2 text-sm text-steel-200/70">
               <li className="flex items-center gap-2"><Check className="h-4 w-4" /> RP/CCP-reviewed</li>
               <li className="flex items-center gap-2"><Check className="h-4 w-4" /> Senior DoD advisor</li>
               <li className="flex items-center gap-2"><Check className="h-4 w-4" /> We never touch your CUI</li>
@@ -118,7 +132,7 @@ export default function Home() {
       {/* The difference */}
       <section className="bg-navy-900 text-steel-200">
         <Container className="py-16 sm:py-24">
-          <Eyebrow>The difference</Eyebrow>
+          <Eyebrow tone="dark">The difference</Eyebrow>
           <h2 className="mt-4 max-w-2xl text-3xl font-bold text-white sm:text-4xl">
             Done for you &mdash; without handing over your environment.
           </h2>
