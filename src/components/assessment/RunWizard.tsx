@@ -96,6 +96,18 @@ export default function RunWizard() {
     }
   }
 
+  function reset() {
+    setStep("upload");
+    setFiles([]);
+    setAttested(false);
+    setError("");
+    setResult(null);
+    setFindings([]);
+    setAssessmentId(null);
+    setAiAnalyzed(true);
+    if (typeof window !== "undefined") window.scrollTo({ top: 0 });
+  }
+
   if (step === "interview" && assessmentId) {
     return (
       <InterviewWizard
@@ -120,6 +132,7 @@ export default function RunWizard() {
         result={result}
         findings={findings}
         aiAnalyzed={aiAnalyzed}
+        onReset={reset}
         onStartInterview={
           assessmentId
             ? () => {

@@ -96,11 +96,13 @@ export default function DualResults({
   findings = [],
   aiAnalyzed = true,
   onStartInterview,
+  onReset,
 }: {
   result: DualScoreResult;
   findings?: Finding[];
   aiAnalyzed?: boolean;
   onStartInterview?: () => void;
+  onReset?: () => void;
 }) {
   const verdict = scoreVerdict(result.defensible.score);
   const coverage = computeCoverage(findings);
@@ -127,12 +129,13 @@ export default function DualResults({
             control, incident response, etc.) &mdash; not a résumé, a contract, or another kind of
             document.
           </p>
-          <Link
-            href="/assessment/run"
+          <button
+            type="button"
+            onClick={() => (onReset ? onReset() : window.location.assign("/assessment/run"))}
             className="mt-3 inline-flex items-center justify-center rounded-lg bg-navy-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-navy-800"
           >
             Upload different files
-          </Link>
+          </button>
         </div>
       )}
 
