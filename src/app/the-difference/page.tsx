@@ -108,7 +108,7 @@ export default function TheDifference() {
             See where you stand &mdash; on your own terms.
           </h2>
           <div className="mt-7 flex justify-center">
-            <CTA href="/assessment">Get your free SPRS assessment</CTA>
+            <CTA href="/assessment/run">Get your free SPRS assessment</CTA>
           </div>
         </Container>
       </section>

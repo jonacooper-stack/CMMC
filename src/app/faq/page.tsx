@@ -74,7 +74,7 @@ export default function FAQ() {
           <h2 className="mx-auto max-w-2xl text-3xl font-bold">Still have a question?</h2>
           <div className="mt-7 flex justify-center gap-3">
             <CTA href="/contact" variant="ghost">Talk to us</CTA>
-            <CTA href="/assessment">Get your free assessment</CTA>
+            <CTA href="/assessment/run">Get your free assessment</CTA>
           </div>
         </Container>
       </section>

@@ -71,7 +71,7 @@ export default function About() {
         <Container className="py-16 text-center">
           <h2 className="mx-auto max-w-2xl text-3xl font-bold">Let&rsquo;s see where you stand.</h2>
           <div className="mt-7 flex justify-center gap-3">
-            <CTA href="/assessment">Get your free SPRS assessment</CTA>
+            <CTA href="/assessment/run">Get your free SPRS assessment</CTA>
             <CTA href="/contact" variant="ghost">Talk to us</CTA>
           </div>
         </Container>

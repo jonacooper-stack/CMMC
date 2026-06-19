@@ -30,12 +30,12 @@ export default function SiteHeader() {
         </nav>
         <div className="flex items-center gap-3">
           <Link
-            href="/assessment"
+            href="/sign-in"
             className="hidden text-sm font-semibold text-navy-900 hover:text-steel-700 sm:inline"
           >
-            Free SPRS assessment
+            Sign in
           </Link>
-          <CTA href="/assessment" className="px-4 py-2">
+          <CTA href="/assessment/run" className="px-4 py-2">
             Get my score
           </CTA>
         </div>

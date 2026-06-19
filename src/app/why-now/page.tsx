@@ -57,7 +57,7 @@ export default function WhyNow() {
             start now are the ones who keep winning work.
           </p>
           <div className="mt-7 flex justify-center">
-            <CTA href="/assessment">Get your free SPRS assessment</CTA>
+            <CTA href="/assessment/run">Get your free SPRS assessment</CTA>
           </div>
         </Container>
       </section>

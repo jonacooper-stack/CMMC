@@ -44,7 +44,7 @@ export default function Home() {
               </span>
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <CTA href="/assessment">Get your free SPRS assessment</CTA>
+              <CTA href="/assessment/run">Get your free SPRS assessment</CTA>
               <CTA href="/how-it-works" variant="ghost">
                 See how it works
               </CTA>
@@ -269,7 +269,7 @@ export default function Home() {
               to handle it.
             </p>
             <div className="mt-8 flex justify-center">
-              <CTA href="/assessment">Get your free SPRS assessment</CTA>
+              <CTA href="/assessment/run">Get your free SPRS assessment</CTA>
             </div>
           </div>
         </Container>

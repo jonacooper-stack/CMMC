@@ -21,7 +21,7 @@ export default function Contact() {
             Prefer to talk first? Reach us directly.
           </p>
           <div className="mt-8 flex flex-col items-center gap-4">
-            <CTA href="/assessment">Get your free SPRS assessment</CTA>
+            <CTA href="/assessment/run">Get your free SPRS assessment</CTA>
             <a
               href="mailto:hello@getmuster.com"
               className="text-sm font-semibold text-navy-900 hover:text-steel-700"

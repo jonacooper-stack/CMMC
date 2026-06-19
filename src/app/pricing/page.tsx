@@ -88,7 +88,7 @@ export default function Pricing() {
                 <div className="mt-4 rounded-lg bg-paper px-4 py-3 text-sm text-slate-600">
                   <span className="font-semibold text-navy-900">{t.setup}</span> one-time onboarding
                 </div>
-                <CTA href="/assessment" className="mt-6" variant={t.featured ? "primary" : "ghost"}>
+                <CTA href="/assessment/run" className="mt-6" variant={t.featured ? "primary" : "ghost"}>
                   Start with a free assessment
                 </CTA>
               </div>
@@ -131,7 +131,7 @@ export default function Pricing() {
             Not sure which tier fits? The free assessment tells you.
           </h2>
           <div className="mt-7 flex justify-center">
-            <CTA href="/assessment">Get your free SPRS assessment</CTA>
+            <CTA href="/assessment/run">Get your free SPRS assessment</CTA>
           </div>
         </Container>
       </section>

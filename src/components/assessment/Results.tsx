@@ -138,7 +138,7 @@ export default function Results({
         </p>
         <div className="mt-5 flex flex-wrap gap-3">
           <Link
-            href="/assessment"
+            href="/assessment/run"
             className="inline-flex items-center justify-center rounded-lg bg-cleared-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-cleared-700"
           >
             Get my full report
