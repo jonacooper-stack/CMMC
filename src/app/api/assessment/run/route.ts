@@ -6,7 +6,7 @@
  */
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { requireAccount } from "@/lib/account";
+import { getCurrentAccount } from "@/lib/account";
 import {
   addDocuments,
   createAssessment,
@@ -40,9 +40,22 @@ const bodySchema = z.object({
 export async function POST(request: Request): Promise<NextResponse> {
   let accountId: string;
   try {
-    accountId = (await requireAccount()).id;
-  } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const account = await getCurrentAccount();
+    if (!account) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    accountId = account.id;
+  } catch (e) {
+    // getCurrentAccount only throws on a real DB/config failure (missing
+    // DATABASE_URL or an un-migrated schema) — surface it instead of masking it
+    // as "Unauthorized", which sent earlier debugging down the wrong path.
+    console.error("[assessment/run] account lookup failed:", e);
+    return NextResponse.json(
+      {
+        error: `Database error: ${e instanceof Error ? e.message : "unknown"}. If this is a fresh deploy, sign in and open /api/admin/migrate once to create the tables.`,
+      },
+      { status: 500 },
+    );
   }
 
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
