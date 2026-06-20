@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function RunPage() {
   return (
-    <section className="bg-white">
+    <section className="bg-navy-900 text-steel-200">
       <Container className="py-12 sm:py-16">
         <RunWizard />
       </Container>

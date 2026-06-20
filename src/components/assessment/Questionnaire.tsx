@@ -117,7 +117,7 @@ export default function Questionnaire() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <div className="flex items-center justify-between text-xs text-slate-500">
+      <div className="flex items-center justify-between text-xs text-steel-200/60">
         <span>
           Step {step + 1} of {steps.length}
         </span>
@@ -125,7 +125,7 @@ export default function Questionnaire() {
           {answeredCount} of {total} answered
         </span>
       </div>
-      <div className="mt-2 h-1.5 rounded-full bg-line">
+      <div className="mt-2 h-1.5 rounded-full bg-white/10">
         <div
           className="h-full rounded-full bg-cleared-500 transition-all"
           style={{ width: `${pct}%` }}
@@ -133,22 +133,22 @@ export default function Questionnaire() {
       </div>
 
       <div className="mt-8">
-        <Eyebrow>
+        <Eyebrow tone="dark">
           {family.id} · {family.name}
         </Eyebrow>
-        <h1 className="mt-3 text-2xl font-bold sm:text-3xl">{family.name}</h1>
-        <p className="mt-2 text-slate-600">{family.intro}</p>
-        <p className="mt-2 text-xs text-slate-400">
+        <h1 className="mt-3 text-2xl font-bold text-white sm:text-3xl">{family.name}</h1>
+        <p className="mt-2 text-steel-200/80">{family.intro}</p>
+        <p className="mt-2 text-xs text-steel-200/50">
           {familyAnswered}/{familyControls.length} answered in this section
         </p>
       </div>
 
       <ul className="mt-7 space-y-3">
         {familyControls.map((c) => (
-          <li key={c.id} className="rounded-xl border border-line bg-white p-4 sm:p-5">
+          <li key={c.id} className="rounded-xl border border-white/10 bg-white/5 p-4 sm:p-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <p className="min-w-0 text-sm font-medium text-navy-900">
-                <span className="font-mono text-xs text-steel-700">{c.id}</span> {c.title}
+              <p className="min-w-0 text-sm font-medium text-white">
+                <span className="font-mono text-xs text-steel-200/60">{c.id}</span> {c.title}
               </p>
               <div
                 role="radiogroup"
@@ -184,7 +184,7 @@ export default function Questionnaire() {
                     ? "Why doesn't this apply? (e.g. remote-first — no internal network)"
                     : "Add a note (optional)"
                 }
-                className="mt-3 block w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-steel-500 focus:outline-none"
+                className="mt-3 block w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-steel-500 focus:border-cleared-500 focus:outline-none"
               />
             )}
           </li>
@@ -196,7 +196,7 @@ export default function Questionnaire() {
           type="button"
           onClick={() => go(Math.max(0, step - 1))}
           disabled={step === 0}
-          className="rounded-lg border border-line bg-white px-5 py-2.5 text-sm font-semibold text-navy-900 transition-colors hover:border-steel-500 disabled:opacity-40"
+          className="rounded-lg border border-white/20 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/10 disabled:opacity-40"
         >
           Back
         </button>
@@ -210,7 +210,7 @@ export default function Questionnaire() {
               go(step + 1);
             }
           }}
-          className="rounded-lg bg-cleared-600 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-cleared-700"
+          className="rounded-lg bg-cleared-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm shadow-cleared-700/20 transition-colors hover:bg-cleared-700"
         >
           {isLast ? "See my score" : "Next section"}
         </button>
@@ -220,11 +220,11 @@ export default function Questionnaire() {
 }
 
 const BASE_OPT_CLS =
-  "rounded-lg border border-line bg-paper px-3 py-2 text-xs font-semibold text-slate-600 transition-colors hover:border-steel-500";
+  "rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-xs font-semibold text-steel-200/80 transition-colors hover:border-white/30";
 
 const SELECTED_CLS: Record<ControlStatus, string> = {
   met: "rounded-lg border border-cleared-500 bg-cleared-600 px-3 py-2 text-xs font-semibold text-white",
   partial: "rounded-lg border border-amber-500 bg-amber-500 px-3 py-2 text-xs font-semibold text-white",
-  not_met: "rounded-lg border border-navy-900 bg-navy-900 px-3 py-2 text-xs font-semibold text-white",
-  na: "rounded-lg border border-slate-400 bg-slate-500 px-3 py-2 text-xs font-semibold text-white",
+  not_met: "rounded-lg border border-white/30 bg-white/15 px-3 py-2 text-xs font-semibold text-white",
+  na: "rounded-lg border border-steel-500 bg-steel-500 px-3 py-2 text-xs font-semibold text-white",
 };

@@ -198,11 +198,11 @@ export default function RunWizard() {
     const uploading = phase === "uploading";
     return (
       <div className="mx-auto max-w-xl py-10 text-center">
-        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-line border-t-cleared-600" />
-        <h2 className="mt-6 text-xl font-bold text-navy-900">
+        <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-white/15 border-t-cleared-500" />
+        <h2 className="mt-6 text-xl font-bold text-white">
           {uploading ? "Uploading your documents…" : "Reviewing your policies…"}
         </h2>
-        <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
+        <p className="mx-auto mt-2 max-w-md text-sm text-steel-200/80">
           {uploading
             ? "Securely sending your files — this is usually quick."
             : "We’re reading your documents and checking them against all 110 NIST 800-171 controls. This can take a minute or two for large policy sets — hang tight."}
@@ -214,12 +214,12 @@ export default function RunWizard() {
   if (step === "error") {
     return (
       <div className="mx-auto max-w-xl py-10 text-center">
-        <h2 className="text-xl font-bold text-navy-900">That didn&rsquo;t work</h2>
-        <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">{error}</p>
+        <h2 className="text-xl font-bold text-white">That didn&rsquo;t work</h2>
+        <p className="mx-auto mt-2 max-w-md text-sm text-steel-200/80">{error}</p>
         <button
           type="button"
           onClick={() => setStep("upload")}
-          className="mt-5 inline-flex items-center justify-center rounded-lg bg-cleared-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-cleared-700"
+          className="mt-5 inline-flex items-center justify-center rounded-lg bg-cleared-600 px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-cleared-700/20 transition-colors hover:bg-cleared-700"
         >
           Try again
         </button>
@@ -229,22 +229,22 @@ export default function RunWizard() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <Eyebrow>AI policy review</Eyebrow>
-      <h1 className="mt-3 text-3xl font-bold sm:text-4xl">Upload your policies</h1>
-      <p className="mt-2 text-slate-600">
+      <Eyebrow tone="dark">AI policy review</Eyebrow>
+      <h1 className="mt-3 text-3xl font-bold text-white sm:text-4xl">Upload your policies</h1>
+      <p className="mt-2 text-steel-200/80">
         Add your written security policies and procedures &mdash; SSP, policies, plans. We&rsquo;ll
         read them, map them to all 110 NIST 800-171 controls, and give you your estimated SPRS
         score in about a minute.
       </p>
 
-      <div className="mt-6 rounded-xl border border-amber-500 bg-amber-50 p-4 text-sm text-slate-600">
-        <strong className="text-navy-900">Upload policies, not CUI.</strong> These should be your
+      <div className="mt-6 rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-steel-200/80">
+        <strong className="text-white">Upload policies, not CUI.</strong> These should be your
         security <em>documentation</em> (PDF, Word, or text) — never controlled technical data, ITAR
         material, or other CUI. We never need your CUI to assess you.
       </div>
 
-      <div className="mt-6 rounded-2xl border border-line bg-white p-6">
-        <p className="text-sm font-medium text-navy-900">Policy documents</p>
+      <div className="mt-6 rounded-2xl border border-white/10 bg-white/5 p-6">
+        <p className="text-sm font-medium text-white">Policy documents</p>
 
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <input
@@ -258,11 +258,11 @@ export default function RunWizard() {
           />
           <label
             htmlFor="policy-files"
-            className="inline-flex cursor-pointer items-center rounded-lg bg-navy-900 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-navy-800"
+            className="inline-flex cursor-pointer items-center rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10"
           >
             {files.length ? "Add more files" : "Choose files"}
           </label>
-          <span className="text-sm text-slate-500">
+          <span className="text-sm text-steel-200/60">
             {files.length
               ? `${files.length} file${files.length === 1 ? "" : "s"} selected`
               : "PDF, Word, or text"}
@@ -270,17 +270,17 @@ export default function RunWizard() {
         </div>
 
         {files.length > 0 && (
-          <ul className="mt-3 space-y-1 text-sm text-slate-600">
+          <ul className="mt-3 space-y-1 text-sm text-steel-200/80">
             {files.map((f) => (
               <li key={`${f.name}:${f.size}`} className="flex items-center justify-between gap-3">
                 <span className="truncate">{f.name}</span>
                 <span className="flex flex-none items-center gap-3">
-                  <span className="text-slate-400">{Math.ceil(f.size / 1024)} KB</span>
+                  <span className="text-steel-200/50">{Math.ceil(f.size / 1024)} KB</span>
                   <button
                     type="button"
                     onClick={() => removeFile(f.name, f.size)}
                     aria-label={`Remove ${f.name}`}
-                    className="font-medium text-slate-400 transition-colors hover:text-amber-600"
+                    className="font-medium text-steel-200/50 transition-colors hover:text-amber-400"
                   >
                     Remove
                   </button>
@@ -290,9 +290,9 @@ export default function RunWizard() {
           </ul>
         )}
 
-        <div className="mt-5 border-t border-line pt-5">
-          <p className="text-sm font-medium text-navy-900">Or link to a public document</p>
-          <p className="mt-1 text-xs text-slate-500">
+        <div className="mt-5 border-t border-white/10 pt-5">
+          <p className="text-sm font-medium text-white">Or link to a public document</p>
+          <p className="mt-1 text-xs text-steel-200/60">
             Paste a URL to a policy hosted online (e.g. your public privacy policy) and we&rsquo;ll
             fetch and read the page &mdash; no download needed.
           </p>
@@ -312,20 +312,20 @@ export default function RunWizard() {
                 }
               }}
               placeholder="https://example.com/privacy-policy"
-              className="min-w-0 flex-1 rounded-lg border border-line bg-paper px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:border-steel-500 focus:outline-none"
+              className="min-w-0 flex-1 rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-steel-500 focus:border-cleared-500 focus:outline-none"
             />
             <button
               type="button"
               onClick={addLink}
               disabled={!linkInput.trim()}
-              className="flex-none rounded-lg border border-navy-900 bg-white px-4 py-2 text-sm font-semibold text-navy-900 transition-colors hover:bg-navy-900 hover:text-white disabled:opacity-40"
+              className="flex-none rounded-lg border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-white/10 disabled:opacity-40"
             >
               Add link
             </button>
           </div>
-          {linkError && <p className="mt-1.5 text-xs text-amber-600">{linkError}</p>}
+          {linkError && <p className="mt-1.5 text-xs text-amber-400">{linkError}</p>}
           {links.length > 0 && (
-            <ul className="mt-3 space-y-1 text-sm text-slate-600">
+            <ul className="mt-3 space-y-1 text-sm text-steel-200/80">
               {links.map((l) => (
                 <li key={l} className="flex items-center justify-between gap-3">
                   <span className="truncate" title={l}>
@@ -335,7 +335,7 @@ export default function RunWizard() {
                     type="button"
                     onClick={() => removeLink(l)}
                     aria-label={`Remove ${l}`}
-                    className="flex-none font-medium text-slate-400 transition-colors hover:text-amber-600"
+                    className="flex-none font-medium text-steel-200/50 transition-colors hover:text-amber-400"
                   >
                     Remove
                   </button>
@@ -345,7 +345,7 @@ export default function RunWizard() {
           )}
         </div>
 
-        <label className="mt-5 flex items-start gap-2.5 text-sm text-slate-600">
+        <label className="mt-5 flex items-start gap-2.5 text-sm text-steel-200/80">
           <input
             type="checkbox"
             checked={attested}
@@ -362,15 +362,15 @@ export default function RunWizard() {
           type="button"
           onClick={run}
           disabled={(!files.length && !links.length) || !attested}
-          className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-cleared-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-cleared-700 disabled:opacity-50"
+          className="mt-6 inline-flex w-full items-center justify-center rounded-lg bg-cleared-600 px-5 py-3 text-sm font-semibold text-white shadow-sm shadow-cleared-700/20 transition-colors hover:bg-cleared-700 disabled:opacity-50"
         >
           Analyze my policies
         </button>
       </div>
 
-      <p className="mt-4 text-center text-sm text-slate-500">
+      <p className="mt-4 text-center text-sm text-steel-200/60">
         No policies written yet, or not ready to share them?{" "}
-        <a href="/assessment/questionnaire" className="font-medium text-cleared-700 underline">
+        <a href="/assessment/questionnaire" className="font-medium text-cleared-500 underline">
           Take the guided questionnaire instead
         </a>
         .
