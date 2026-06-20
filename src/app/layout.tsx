@@ -7,7 +7,7 @@ import SiteFooter from "@/components/SiteFooter";
 
 // Display: an engineered grotesk for headlines + the wordmark (aerospace/defense
 // feel). Body: Inter for clean, legible UI. Mono: JetBrains for control ids/labels.
-const display = Space_Grotesk({ variable: "--font-display", subsets: ["latin"] });
+const display = Space_Grotesk({ variable: "--font-space", subsets: ["latin"] });
 const sans = Inter({ variable: "--font-inter", subsets: ["latin"] });
 const mono = JetBrains_Mono({ variable: "--font-jetbrains", subsets: ["latin"] });
 

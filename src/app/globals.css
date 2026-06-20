@@ -40,7 +40,7 @@
 
   /* Type. */
   --font-sans: var(--font-inter), system-ui, sans-serif;
-  --font-display: var(--font-display), var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-space), var(--font-inter), system-ui, sans-serif;
   --font-mono: var(--font-jetbrains), ui-monospace, "SFMono-Regular", monospace;
 }
 
@@ -65,4 +65,55 @@ h4 {
 ::selection {
   background: var(--color-cleared-500);
   color: #fff;
+}
+
+/* ---- Motion: high-tech flourishes (all gated for reduced-motion below) ---- */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@keyframes cell-in {
+  0% { opacity: 0.06; transform: scale(0.55); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.animate-cell { animation: cell-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+.animate-pulse-dot { animation: pulse-dot 1.4s ease-in-out infinite; }
+
+@keyframes sweep {
+  to { transform: rotate(360deg); }
+}
+.animate-sweep { animation: sweep 6s linear infinite; transform-origin: center; }
+
+@keyframes scan-y {
+  0% { transform: translateY(-130%); }
+  100% { transform: translateY(130%); }
+}
+.animate-scan { animation: scan-y 4.5s linear infinite; }
+
+@keyframes drift {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -14px, 0); }
+}
+.animate-drift { animation: drift 9s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .animate-cell,
+  .animate-pulse-dot,
+  .animate-sweep,
+  .animate-scan,
+  .animate-drift {
+    animation: none !important;
+  }
 }
