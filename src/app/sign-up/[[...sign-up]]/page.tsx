@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default function SignUpPage() {
   return (
-    <section className="bg-white">
+    <section className="bg-navy-900">
       <Container className="flex justify-center py-16 sm:py-20">
         <SignUp />
       </Container>

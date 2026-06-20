@@ -45,8 +45,8 @@
 }
 
 body {
-  background: var(--color-paper);
-  color: var(--color-slate-700);
+  background: var(--color-navy-900);
+  color: var(--color-steel-200);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
@@ -55,7 +55,7 @@ h1,
 h2,
 h3,
 h4 {
-  color: var(--color-ink);
+  color: #ffffff;
   font-family: var(--font-display);
   font-weight: 700;
   letter-spacing: -0.02em;

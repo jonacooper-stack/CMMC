@@ -51,8 +51,8 @@ export default function Home() {
             <div className="max-w-2xl">
               <Eyebrow tone="dark">Managed NIST 800-171 &amp; SPRS compliance</Eyebrow>
               <h1 className="mt-5 text-4xl font-bold leading-[1.04] tracking-tight text-white sm:text-6xl">
-                Keep your SPRS score correct.{" "}
-                <span className="text-cleared-500">Keep winning work.</span>
+                Streamline your compliance.{" "}
+                <span className="text-cleared-500">Fast-track your CMMC.</span>
               </h1>
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-steel-200/85 sm:text-xl">
                 Muster runs your defense-compliance program for you &mdash; your SPRS score, your

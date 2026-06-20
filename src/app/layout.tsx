@@ -13,7 +13,7 @@ const mono = JetBrains_Mono({ variable: "--font-jetbrains", subsets: ["latin"] }
 
 export const metadata: Metadata = {
   title: {
-    default: "Muster — Keep your SPRS score correct. Keep winning work.",
+    default: "Muster — Streamline your compliance. Fast-track your CMMC.",
     template: "%s · Muster",
   },
   description:
